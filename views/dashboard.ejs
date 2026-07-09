@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileUploader</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/dashboard/dashboard.css">
+  </head>
+  <body>
+    <div class="error-message"></div>
+    <dialog class="folder-dialog">
+      <div class="flex-between-row">
+        <h2>Create a new folder</h2>
+        <div class="close-icon">
+          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
+        </div>
+      </div>
+      <form action="/folder/create" method="post">
+        <label for="folder_name">Name</label>
+        <input type="text" name="folder_name" />
+        <button type="submit">Create</button>
+      </form>
+    </dialog>
+    <dialog class="share-folder-dialog">
+      <div class="flex-between-row">
+        <h2>Share folder</h2>
+        <div class="close-icon">
+          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
+        </div>
+      </div>
+      <form action="/folder/share" method="post">
+         <label for="expiration_days">Select the amount of days you want to share the folder for</label>
+          <select name="expiration_days">
+            <option value="1">1 day</option>
+            <option value="7">7 days</option>
+            <option value="15">15 days</option>
+            <option value="30">30 days</option>
+          </select>
+          <input type="hidden" name="folder_id" class="folder-id-input">
+          <button type="submit">Share</button>
+      </form>
+    </dialog>
+    <%- include('./partials/header') %>
+    <main class="std-padding">
+      <div class="subheader flex-between-row">
+        <h2 class="sm-mb">User folders</h2>
+        <button class="create-folder-button">Create new folder</button>
+      </div>
+      <% if(folders.length > 0) { %>
+          <div class="table">
+            <div class="table-header">
+              <div>Name</div>
+              <div>Last access</div>
+              <div>Total size</div>
+              <div>Actions</div>
+            </div>
+            <% folders.forEach((folder) => { %>
+              <div class="table-row">
+                <a href="/folder/files/<%= folder.folder_id %>"><%= folder.folder_name %></a>
+                <span><%= folder.last_used.toLocaleDateString() %></span>
+                <span>50 KB</span>
+                <span style="display: flex; gap: .5rem; justify-content: center; align-items: center;">
+                  <a href="/folder/delete/<%= folder.folder_id %>">Delete</a>
+                  <button class="share-folder-button" onclick="shareFolder(<%= folder.folder_id %>)">Share</button>
+                </span>
+              </div>
+            <% }); %>
+          </div>
+      <% } else { %>
+          <div>You have no created any folders yet</div>
+      <% } %>
+    </main>
+    <script>
+      const folderDialog = document.querySelector(".folder-dialog");
+      const createFolderButton = document.querySelector(".create-folder-button");
+      const closeIcon = document.querySelector(".close-icon");
+
+      const shareFolderDialog = document.querySelector(".share-folder-dialog");
+
+      const error = <%- JSON.stringify(errorMessage) %>
+
+      createFolderButton.addEventListener('click', () => {
+        folderDialog.showModal();
+      });
+
+      closeIcon.addEventListener('click', () => {
+        folderDialog.close();
+      });
+
+      function shareFolder(folderId) {
+        console.log("Id del folder a compartir", folderId);
+        const folderIdInput = document.querySelector('.folder-id-input');
+        shareFolderDialog.showModal();
+        folderIdInput.value = folderId;
+      }
+
+      if(error) {
+        const errorMessageContainer = document.querySelector(".error-message");
+        errorMessageContainer.textContent = error;
+        errorMessageContainer.style.display = "block";
+        setTimeout(() => {
+          errorMessageContainer.style.display = 'none';
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

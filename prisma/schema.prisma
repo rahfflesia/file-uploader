@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model files {
+  file_id                  Int       @id @default(autoincrement())
+  file_name                String    @db.VarChar(512)
+  url                      String    @db.VarChar(512)
+  uploaded_at              DateTime? @default(now()) @db.Timestamptz(6)
+  folder_id                Int
+  cloudinary_public_id     String?   @db.VarChar(255)
+  cloudinary_resource_type String?   @db.VarChar(16)
+  folders                  folders   @relation(fields: [folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model folders {
+  folder_id      Int              @id @default(autoincrement())
+  folder_name    String           @db.VarChar(128)
+  last_used      DateTime?        @default(now()) @db.Timestamptz(6)
+  user_id        Int
+  files          files[]
+  users          users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  shared_folders shared_folders[]
+}
+
+model users {
+  user_id        Int              @id @default(autoincrement())
+  first_name     String           @db.VarChar(255)
+  last_name      String           @db.VarChar(255)
+  email          String           @unique @db.VarChar(254)
+  password_hash  String           @db.VarChar(64)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  folders        folders[]
+  shared_folders shared_folders[]
+}
+
+model session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime @db.Timestamptz(6)
+}
+
+model shared_folders {
+  id_shared_folder Int      @id @default(autoincrement())
+  link_uuid        String   @unique(map: "unique_uuid") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          Int
+  folder_id        Int
+  expires_at       DateTime @db.Timestamptz(6)
+  folders          folders  @relation(fields: [folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction)
+  users            users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}

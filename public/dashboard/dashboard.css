@@ -1,0 +1,35 @@
+@import url("../styles.css");
+
+.table-header {
+  display: flex;
+  background-color: lightgray;
+}
+
+.table-header > div {
+  flex: 1;
+  padding: 0.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.table-row {
+  background-color: rgb(242, 242, 242);
+  display: flex;
+  padding: 0.5rem;
+}
+
+.table-row > * {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.close-icon {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.close-icon img {
+  width: 30px;
+  height: 30px;
+}

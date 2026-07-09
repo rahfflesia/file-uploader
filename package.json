@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@quixo3/prisma-session-store": "^3.1.21",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.10.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "multer": "^2.2.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.22.0",
+    "prisma": "^7.8.0"
+  }
+}

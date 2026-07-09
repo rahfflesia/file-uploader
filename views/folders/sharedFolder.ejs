@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileUploader | Shared folder</title>
+  </head>
+  <body>
+    <%- include("../partials/header"); %>
+    <h1>Someone shared this folder with you</h1>
+    <% if(sharedFolderFiles.length > 0) { %>
+      <% sharedFolderFiles.forEach((file) => { %>
+        <div><%= file.file_name %></div>
+        <div><%= file.uploaded_at.toLocaleDateString(); %></div>
+        <button class="download-file-button">Download</button>
+      <% }); %>
+    <% } else { %>
+      <div>This folder has no files</div>
+    <% } %>
+  </body>
+  <script>
+    const filesArray = <%- JSON.stringify(sharedFolderFiles) %>
+    const downloadButtons = document.querySelectorAll(".download-file-button");
+
+    for(let i = 0; i < downloadButtons.length; i++) {
+      const downloadButton = downloadButtons[i];
+      downloadButton.addEventListener('click', () => {
+        const file = filesArray[i];
+        fetch(file.url).then((response) => response.blob()).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = file.file_name;
+            a.click();
+            document.body.appendChild(a);
+            URL.revokeObjectURL(url);
+        }).catch((error) => console.error(error));;
+      });
+    }
+  </script>
+</html>

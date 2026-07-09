@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Folder files</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <dialog class="upload-file-dialog">
+      <div class="flex-between-row">
+        <h2>Upload file</h2>
+        <div class="close-icon">
+          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
+        </div>
+      </div>
+      <form action="/file/upload/" method="post" enctype="multipart/form-data" class="file-upload-form">
+        <label for="uploaded_file">Upload file</label>
+        <input type="file" name="archivo">
+        <input type="hidden" name="folder_id" value="<%= locals.folder_id %>">
+        <button type="submit">Upload</button>
+      </form>
+    </dialog>
+    <%- include('../partials/header') %>
+    <main class="std-padding">
+      <div class="flex-between-row">
+        <h2 class="sm-mb">Folder files</h2>
+        <button class="upload-file-button">Upload file</button>
+      </div>
+      <% if(files.length > 0) { %>
+          <div class="table-header">
+            <div>File name</div>
+            <div>Upload date</div>
+            <div>Actions</div>
+          </div>
+          <% files.forEach((file) => { %>
+              <div class="table-row">
+                <div><a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a></div>
+                <div><%= file.uploaded_at.toLocaleDateString() %></div>
+                <div class="actions">
+                  <button class="download-file-button">Download</button>
+                  <a href="/file/delete/<%= file.file_id %>">Delete</a>
+                </div>
+              </div>
+          <% }); %>
+      <% } else { %>
+          <div>This folder has no files</div>
+      <% } %>
+    </main>
+  </body>
+  <script>
+    const uploadFileDialog = document.querySelector(".upload-file-dialog");
+    const uploadFileButton = document.querySelector(".upload-file-button");
+    const closeDialogButton = document.querySelector(".close-icon");
+
+    const filesArray = <%- JSON.stringify(files) %>
+    const downloadButtons = document.querySelectorAll(".download-file-button");
+
+    uploadFileButton.addEventListener('click', () => {
+      uploadFileDialog.showModal();
+    });
+
+    closeDialogButton.addEventListener('click', () => {
+      uploadFileDialog.close();
+    });
+
+    for(let i = 0; i < downloadButtons.length; i++) {
+      const downloadButton = downloadButtons[i];
+      downloadButton.addEventListener('click', () => {
+        const file = filesArray[i];
+        fetch(file.url).then((response) => response.blob()).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = file.file_name;
+            a.click();
+            document.body.appendChild(a);
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }).catch((error) => console.error(error));;
+      });
+    }
+  </script>
+</html>
