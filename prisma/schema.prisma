@@ -15,6 +15,7 @@ model files {
   folder_id                Int
   cloudinary_public_id     String?   @db.VarChar(255)
   cloudinary_resource_type String?   @db.VarChar(16)
+  bytes                    Int
   folders                  folders   @relation(fields: [folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction)
 }
 

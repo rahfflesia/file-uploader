@@ -1,5 +1,6 @@
 const prisma = require("../lib/prisma");
 const Folder = require("../models/Folder");
+const { convertBytes } = require("../helpers/helpers");
 
 async function createFolder(req, res) {
   const folderData = {
@@ -12,10 +13,16 @@ async function createFolder(req, res) {
 
 async function getAllFolderFiles(req, res) {
   const folderId = req.params.folder_id;
-  const folderFiles = await Folder.getAllFolderFiles(folderId);
+  const folderFiles = (await Folder.getAllFolderFiles(folderId)).map((file) => {
+    return {
+      ...file,
+      bytes: convertBytes(file.bytes),
+    };
+  });
   res.status(200).render("./folders/folderFiles", {
     files: folderFiles,
     folder_id: folderId,
+    errorMessage: undefined,
   });
 }
 

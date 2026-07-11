@@ -12,6 +12,13 @@ class Folder {
       where: {
         user_id: userId,
       },
+      include: {
+        files: {
+          select: {
+            bytes: true,
+          },
+        },
+      },
     });
     return folders;
   }

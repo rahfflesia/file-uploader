@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
+    <div class="error-message"></div>
     <dialog class="upload-file-dialog">
       <div class="flex-between-row">
         <h2>Upload file</h2>
@@ -30,12 +31,14 @@
       <% if(files.length > 0) { %>
           <div class="table-header">
             <div>File name</div>
+            <div>Size</div>
             <div>Upload date</div>
             <div>Actions</div>
           </div>
           <% files.forEach((file) => { %>
               <div class="table-row">
                 <div><a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a></div>
+                <div><%= file.bytes %></div>
                 <div><%= file.uploaded_at.toLocaleDateString() %></div>
                 <div class="actions">
                   <button class="download-file-button">Download</button>
@@ -55,6 +58,8 @@
 
     const filesArray = <%- JSON.stringify(files) %>
     const downloadButtons = document.querySelectorAll(".download-file-button");
+
+    const error = <%- JSON.stringify(errorMessage) %>
 
     uploadFileButton.addEventListener('click', () => {
       uploadFileDialog.showModal();
@@ -80,6 +85,15 @@
             URL.revokeObjectURL(url);
         }).catch((error) => console.error(error));;
       });
+    }
+
+    if(error) {
+      const errorMessageContainer = document.querySelector(".error-message");
+      errorMessageContainer.textContent = error;
+      errorMessageContainer.style.display = "block";
+      setTimeout(() => {
+        errorMessageContainer.style.display = 'none';
+      }, 5000);
     }
   </script>
 </html>

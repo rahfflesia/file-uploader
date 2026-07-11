@@ -4,6 +4,10 @@
   --padding: 1.5rem;
   --sm-mb: 1.5rem;
   --border-radius: 0.5rem;
+  --box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  --blue: rgb(14, 100, 213);
 }
 
 * {
@@ -89,6 +93,87 @@ dialog::backdrop {
   align-items: center;
 }
 
+.login-form {
+  display: flex;
+  flex-direction: column;
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  gap: 1rem;
+  box-shadow: var(--box-shadow);
+}
+
+.gray-text {
+  color: rgb(151, 151, 151);
+}
+
+.login-form h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.login-form label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.app-name {
+  font-weight: bold;
+  color: var(--blue);
+  animation: app-name 1s ease 0s infinite both alternate;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form span {
+  font-size: 0.8rem;
+}
+
+.mh-100dvh {
+  min-height: 100dvh;
+}
+
+.grid-center {
+  display: grid;
+  place-items: center;
+}
+
+.form-group,
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-name-wrapper {
+  display: flex;
+  padding: var(--padding);
+}
+
+.login-form-wrapper {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.regular-button {
+  padding: 0.55rem 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.default-input {
+  background-color: rgb(246, 246, 246);
+  border-radius: var(--border-radius);
+  padding: 0.5rem 4rem;
+  border: none;
+}
+
 .error-message {
   position: absolute;
   background-color: rgb(229, 65, 65);
@@ -99,4 +184,14 @@ dialog::backdrop {
   margin: 1rem;
   padding: 0.5rem 1rem;
   display: none;
+}
+
+@keyframes app-name {
+  from {
+    font-size: 0.5rem;
+  }
+
+  to {
+    font-size: 3rem;
+  }
 }

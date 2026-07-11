@@ -59,7 +59,7 @@
               <div class="table-row">
                 <a href="/folder/files/<%= folder.folder_id %>"><%= folder.folder_name %></a>
                 <span><%= folder.last_used.toLocaleDateString() %></span>
-                <span>50 KB</span>
+                <span><%= folder.size %></span>
                 <span style="display: flex; gap: .5rem; justify-content: center; align-items: center;">
                   <a href="/folder/delete/<%= folder.folder_id %>">Delete</a>
                   <button class="share-folder-button" onclick="shareFolder(<%= folder.folder_id %>)">Share</button>
