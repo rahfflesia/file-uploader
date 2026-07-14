@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileUploader</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include("../partials/header") %>
+    <form action="/folder/update/" method="post">
+      <h2>Update folder</h2>
+      <label for="folder_name">Folder name</label>
+      <input type="text" name="folder_name" value="<%= folder.folder_name %>" />
+      <input type="hidden" name="folder_id" value="<%= folder.folder_id %>" />
+      <button type="submit">Update</button>
+    </form>
+  </body>
+</html>

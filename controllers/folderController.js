@@ -1,6 +1,6 @@
 const prisma = require("../lib/prisma");
 const Folder = require("../models/Folder");
-const { convertBytes } = require("../helpers/helpers");
+const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 
 async function createFolder(req, res) {
   const folderData = {
@@ -19,9 +19,10 @@ async function getAllFolderFiles(req, res) {
       bytes: convertBytes(file.bytes),
     };
   });
+  const folder = await Folder.getFolder(parseInt(folderId));
   res.status(200).render("./folders/folderFiles", {
     files: folderFiles,
-    folder_id: folderId,
+    folder: folder,
     errorMessage: undefined,
   });
 }
@@ -35,15 +36,6 @@ async function deleteFolder(req, res) {
 // Aquí estoy mezclando lógica del modelo con la del controlador
 // Luego le hago el refactor
 async function shareFolder(req, res) {
-  function isSharedFolder(arr) {
-    for (const folder of arr) {
-      if (Date.now() < folder.expires_at.getTime()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   const folderHistory = await prisma.shared_folders.findMany({
     where: {
       folder_id: parseInt(req.body.folder_id),
@@ -51,12 +43,7 @@ async function shareFolder(req, res) {
   });
 
   if (isSharedFolder(folderHistory)) {
-    const userId = req.session.passport.user;
-    const folders = await Folder.getAllUserFolders(userId);
-    return res.status(200).render("dashboard", {
-      errorMessage: "This folder has already been shared",
-      folders: folders,
-    });
+    return res.status(200).redirect("/dashboard");
   }
 
   const expirationDays = parseInt(req.body.expiration_days);
@@ -99,10 +86,26 @@ async function getSharedFolder(req, res) {
     .render("./folders/sharedFolder", { sharedFolderFiles: sharedFolderFiles });
 }
 
+async function getUpdateFolderView(req, res) {
+  const folder = await Folder.getFolder(parseInt(req.params.folder_id));
+  const data = {
+    folder_id: folder.folder_id,
+    folder_name: folder.folder_name,
+  };
+  res.status(200).render("./folders/updateFolderName", { folder: data });
+}
+
+async function updateFolderName(req, res) {
+  await Folder.updateFolderName(req.body);
+  res.status(200).redirect("/dashboard");
+}
+
 module.exports = {
   createFolder,
   getAllFolderFiles,
   deleteFolder,
   shareFolder,
   getSharedFolder,
+  updateFolderName,
+  getUpdateFolderView,
 };

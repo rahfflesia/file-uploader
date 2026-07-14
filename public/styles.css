@@ -7,7 +7,11 @@
   --box-shadow:
     rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-  --blue: rgb(14, 100, 213);
+  --blue: #1b71e1;
+  --light-blue: #4d8bff;
+  --lighter-blue: #70a5ff;
+  --table-box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
 }
 
 * {
@@ -30,6 +34,22 @@ dialog {
   transform: translate(-50%, -50%);
 }
 
+.blue {
+  color: var(--blue);
+}
+
+.light-blue {
+  color: var(--light-blue);
+}
+
+.lighter-blue {
+  color: var(--lighter-blue);
+}
+
+.lb2-bg-color {
+  background-color: var(--lighter-blue);
+}
+
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.4);
 }
@@ -39,7 +59,7 @@ dialog::backdrop {
 }
 
 .std-padding {
-  padding: var(--padding);
+  padding: var(--padding) calc(var(--padding) * 4);
 }
 
 .flex-between-row {
@@ -52,28 +72,138 @@ dialog::backdrop {
   margin-bottom: var(--sm-mb);
 }
 
+.table {
+  border-radius: var(--border-radius);
+  border: 1px solid lightgray;
+}
+
 .table-header {
   display: flex;
-  background-color: lightgray;
+  background-color: rgb(237, 237, 237);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+a:visited {
+  color: none;
+}
+
+.info-cards {
+  display: flex;
+  gap: 1rem;
+}
+
+.info-cards img {
+  width: 20px;
+  height: 20px;
+}
+
+.file-name-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.storage-icon-wrapper,
+.file-type-icon-wrapper {
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  background-color: rgba(163, 196, 239, 0.3);
+  display: grid;
+  place-items: center;
+}
+
+.number-of-folders-icon-wrapper {
+  padding: 0.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--border-radius);
+  background-color: rgba(211, 211, 211, 0.3);
+}
+
+.info-cards > * {
+  flex: 1;
+  background-color: white;
+  border-radius: var(--border-radius);
+  border: 1px solid lightgray;
+  padding: var(--padding);
+}
+
+.folder-icon img,
+.file-type-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.table-header {
+  padding: 1rem;
 }
 
 .table-header > div {
   flex: 1;
-  padding: 0.5rem;
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: flex-start;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+label {
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.delete {
+  color: #ff0000;
+}
+
+.delete-folder-icon,
+.share-folder-icon,
+.download-icon,
+.view-link-icon,
+.edit-folder-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.link-dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.share-folder-button,
+.view-link-button {
+  background: none;
+  color: var(--blue);
+  border: none;
+  cursor: pointer;
 }
 
 .table-row {
-  background-color: rgb(242, 242, 242);
+  background-color: white;
   display: flex;
-  padding: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid lightgray;
+}
+
+.table-row > * {
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .table-row > * {
   flex: 1;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.table .table-row:last-child {
+  border-radius: var(--border-radius);
+  border: none;
 }
 
 .close-icon {
@@ -89,8 +219,6 @@ dialog::backdrop {
 .actions {
   display: flex;
   gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
 }
 
 .login-form {
@@ -119,7 +247,6 @@ dialog::backdrop {
 .app-name {
   font-weight: bold;
   color: var(--blue);
-  animation: app-name 1s ease 0s infinite both alternate;
 }
 
 .flex-column {
@@ -170,8 +297,9 @@ dialog::backdrop {
 .default-input {
   background-color: rgb(246, 246, 246);
   border-radius: var(--border-radius);
-  padding: 0.5rem 4rem;
+  padding: 0.5rem;
   border: none;
+  min-width: 300px;
 }
 
 .error-message {
@@ -186,12 +314,50 @@ dialog::backdrop {
   display: none;
 }
 
-@keyframes app-name {
+.app-name span {
+  display: inline-block;
+  animation: fall 1s ease 1 forwards;
+  white-space: unset;
+  opacity: 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.folder-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.folder-icon {
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  background-color: rgba(27, 113, 225, 0.1);
+}
+
+.full-name,
+.logout {
+  font-size: 0.9rem;
+}
+
+.full-name {
+  font-weight: 500;
+}
+
+.logout {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+@keyframes fall {
   from {
-    font-size: 0.5rem;
+    transform: translateY(-50%);
+    opacity: 0.1;
   }
 
   to {
-    font-size: 3rem;
+    transform: translateY(0);
+    opacity: 1;
   }
 }

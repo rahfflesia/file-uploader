@@ -1,10 +1,10 @@
 <header class="flex-between-row fu-header std-padding">
-  <h1>FileUploader</h1>
-  <div>
-    <span
-      ><%= locals.currentUser?.first_name ?? 'guest' + ' ' +
-      locals.currentUser?.last_name ?? '' %></span
+  <h2 style="font-weight: bolder" class="blue">FileUploader</h2>
+  <div style="display: flex; gap: 0.75rem; align-items: center">
+    <span class="full-name"
+      ><%= locals.currentUser.first_name + ' ' + locals.currentUser.last_name
+      %></span
     >
-    <a href="/auth/log-out">Log out</a>
+    <a href="/auth/log-out" class="logout">Log out</a>
   </div>
 </header>

@@ -15,20 +15,23 @@
           <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
         </div>
       </div>
-      <form action="/file/upload/" method="post" enctype="multipart/form-data" class="file-upload-form">
-        <label for="uploaded_file">Upload file</label>
-        <input type="file" name="archivo">
-        <input type="hidden" name="folder_id" value="<%= locals.folder_id %>">
-        <button type="submit">Upload</button>
+      <form action="/file/upload/" method="post" enctype="multipart/form-data" class="file-upload-form flex-column" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="uploaded_file">Select the file you want to upload</label>
+          <input type="file" name="archivo">
+        </div>
+        <input type="hidden" name="folder_id" value="<%= folder.folder_id %>">
+        <button type="submit" class="regular-button">Upload</button>
       </form>
     </dialog>
     <%- include('../partials/header') %>
     <main class="std-padding">
-      <div class="flex-between-row">
-        <h2 class="sm-mb">Folder files</h2>
-        <button class="upload-file-button">Upload file</button>
+      <div class="flex-between-row sm-mb">
+        <h2><%= folder.folder_name %> files</h2>
+        <button class="upload-file-button regular-button">Upload file</button>
       </div>
       <% if(files.length > 0) { %>
+        <div class="table">
           <div class="table-header">
             <div>File name</div>
             <div>Size</div>
@@ -37,15 +40,38 @@
           </div>
           <% files.forEach((file) => { %>
               <div class="table-row">
-                <div><a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a></div>
+                <div class="file-name-wrapper">
+                  <div class="file-type-icon-wrapper">
+                    <% switch (file.cloudinary_resource_type) {
+                      case 'video': %>
+                      <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% break;
+                      case 'image': %>
+                        <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% break;
+                      case 'raw': %>
+                        <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% break;
+                      default:
+                      break; } %>
+                  </div>
+                  <a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a>
+                </div>
                 <div><%= file.bytes %></div>
                 <div><%= file.uploaded_at.toLocaleDateString() %></div>
                 <div class="actions">
-                  <button class="download-file-button">Download</button>
-                  <a href="/file/delete/<%= file.file_id %>">Delete</a>
+                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                    <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                    <button class="download-file-button share-folder-button">Download</button>
+                  </div>
+                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                    <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
+                    <a href="/file/delete/<%= file.file_id %>" class="delete">Delete</a>
+                  </div>
                 </div>
               </div>
           <% }); %>
+        </div>
       <% } else { %>
           <div>This folder has no files</div>
       <% } %>

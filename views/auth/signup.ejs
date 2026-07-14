@@ -4,21 +4,64 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FileUploader</title>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
-    <h1>Sign up</h1>
-    <form action="/auth/sign-up" method="post">
-      <label for="first_name">First name</label>
-      <input type="text" name="first_name" />
-      <label for="last_name">Last name</label>
-      <input type="text" name="last_name" />
-      <label for="email">Email</label>
-      <input type="email" name="email" />
-      <label for="password">Password</label>
-      <input type="password" name="password" />
-      <label for="confirmed_password">Confirm password</label>
-      <input type="password" name="confirmed_password" />
-      <button type="submit">Sign up</button>
-    </form>
+  <body class="mh-100dvh flex-column">
+    <div class="login-form-wrapper flex-column">
+      <div class="app-name-wrapper">
+        <h1 class="app-name"></h1>
+      </div>
+      <form action="/auth/sign-up" method="post" class="login-form">
+        <div class="form-section">
+          <h1 style="text-align: center">Sign up</h1>
+          <span style="text-align: center" class="gray-text"
+            >Please enter your details to sign up</span
+          >
+        </div>
+        <div class="form-group">
+          <label for="first_name">First name</label>
+          <input type="text" name="first_name" class="default-input" />
+        </div>
+        <div class="form-group">
+          <label for="last_name">Last name</label>
+          <input type="text" name="last_name" class="default-input" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="email" class="default-input" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" class="default-input" />
+        </div>
+        <div class="form-group">
+          <label for="confirmed_password">Confirm password</label>
+          <input
+            type="password"
+            name="confirmed_password"
+            class="default-input"
+          />
+        </div>
+        <button type="submit" class="regular-button">Sign up</button>
+        <span class="gray-text" style="text-align: center"
+          >Already have an account? <a href="/auth/log-in">Log in</a></span
+        >
+      </form>
+    </div>
   </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const appNameContainer = document.querySelector(".app-name");
+      const text = "FileUploader";
+      let animationDelayMs = 500;
+      for (let i = 0; i < text.length; i++) {
+        const currentLetter = text[i];
+        const span = document.createElement("span");
+        span.style.animation = `fall 500ms ${animationDelayMs}ms ease 1 forwards`;
+        span.textContent = currentLetter;
+        appNameContainer.appendChild(span);
+        animationDelayMs += 100;
+      }
+    });
+  </script>
 </html>

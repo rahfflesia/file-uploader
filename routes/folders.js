@@ -14,4 +14,8 @@ folder.get("/share/:uuid", folderController.getSharedFolder);
 
 folder.post("/share", folderController.shareFolder);
 
+folder.post("/update", folderController.updateFolderName);
+
+folder.get("/update/:folder_id", folderController.getUpdateFolderView);
+
 module.exports = folder;

@@ -19,6 +19,16 @@ function convertBytes(bytes) {
   return `${bytes} B`;
 }
 
+function isSharedFolder(arr) {
+  for (const folder of arr) {
+    if (Date.now() < folder.expires_at.getTime()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 module.exports = {
   convertBytes,
+  isSharedFolder,
 };

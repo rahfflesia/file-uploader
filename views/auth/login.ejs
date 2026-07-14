@@ -9,7 +9,7 @@
   <body class="mh-100dvh flex-column">
     <div class="login-form-wrapper flex-column">
       <div class="app-name-wrapper">
-        <h1 class="app-name">FileUploader</h1>
+        <h1 class="app-name"></h1>
       </div>
       <form action="/auth/log-in" method="post" class="login-form">
         <div class="form-section">
@@ -33,4 +33,19 @@
       </form>
     </div>
   </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const appNameContainer = document.querySelector(".app-name");
+      const text = "FileUploader";
+      let animationDelayMs = 500;
+      for (let i = 0; i < text.length; i++) {
+        const currentLetter = text[i];
+        const span = document.createElement("span");
+        span.style.animation = `fall 500ms ${animationDelayMs}ms ease 1 forwards`;
+        span.textContent = currentLetter;
+        appNameContainer.appendChild(span);
+        animationDelayMs += 100;
+      }
+    });
+  </script>
 </html>

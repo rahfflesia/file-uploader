@@ -54,6 +54,26 @@ class Folder {
       });
     });
   }
+
+  static async getFolder(folderId) {
+    const folder = await prisma.folders.findUnique({
+      where: {
+        folder_id: parseInt(folderId),
+      },
+    });
+    return folder;
+  }
+
+  static async updateFolderName(folderData) {
+    await prisma.folders.update({
+      data: {
+        folder_name: folderData.folder_name,
+      },
+      where: {
+        folder_id: parseInt(folderData.folder_id),
+      },
+    });
+  }
 }
 
 module.exports = Folder;
