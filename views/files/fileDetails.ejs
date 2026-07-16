@@ -4,9 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FileUploader | File Details</title>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
-  <%- include("../partials/header"); %>
-  <body>
-    <div><%= file.file_name %></div>
+  <body class="mh-100dvh flex-column">
+    <%- include("../partials/header"); %>
+    <div class="file-details-wrapper grid-center" style="flex: 1">
+      <div class="file-details">
+        <div class="file-preview-wrapper">
+          <% if(file.mime_type.includes('image')) { %>
+            <img src="<%= file.url %>" alt="image-preview" />
+          <% } else if (file.mime_type.includes('video')) { %>
+            <video src="<%= file.url %>" controls></video>
+          <% } else if (file.mime_type.includes('audio')) { %>
+            <div class="file-type-icon-wrapper" style="padding: 0; display: block;">
+              <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon" style="margin: 0 auto;">
+              <audio src="<%= file.url %>" controls></audio>
+            </div>
+          <% } else if(file.mime_type.includes('application/pdf')) { %>
+            <!-- Aquí no se muy bien que usaré -->
+            <embed src="<%= file.url %>" type="application/pdf">
+          <% } else { %>
+            <div class="file-type-icon-wrapper">
+              <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+            </div>
+          <% } %>
+        </div>
+        <div class="file-details-info">
+          <h2><%= file.file_name %></h2>
+          <h3><%= file.size %></h3>
+          <span>Upload date: <%= file.uploaded_at.toLocaleDateString() %></span>
+          <button class="regular-button">Download</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

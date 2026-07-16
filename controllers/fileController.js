@@ -1,5 +1,6 @@
 const File = require("../models/File");
 const cloudinary = require("cloudinary").v2;
+const { convertBytes } = require("../helpers/helpers");
 
 async function deleteFile(req, res) {
   const fileId = req.params.file_id;
@@ -14,10 +15,27 @@ async function deleteFile(req, res) {
 async function getFileDetails(req, res) {
   const fileId = req.params.file_id;
   const file = await File.getFileDetails(fileId);
-  res.status(200).render("./files/fileDetails", { file: file });
+  const formatedFile = {
+    ...file,
+    size: convertBytes(file.bytes),
+  };
+  res.status(200).render("./files/fileDetails", { file: formatedFile });
+}
+
+async function getUpdateFileNameView(req, res) {
+  const fileId = req.params.file_id;
+  const file = await File.getFileDetails(fileId);
+  res.status(200).render("./files/updateFileName", { file: file });
+}
+
+async function updateFileName(req, res) {
+  const updatedFile = await File.updateFileName(req.body);
+  res.status(200).redirect(`/folder/files/${updatedFile.folder_id}`);
 }
 
 module.exports = {
   deleteFile,
   getFileDetails,
+  getUpdateFileNameView,
+  updateFileName,
 };

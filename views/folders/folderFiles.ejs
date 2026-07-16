@@ -42,18 +42,17 @@
               <div class="table-row">
                 <div class="file-name-wrapper">
                   <div class="file-type-icon-wrapper">
-                    <% switch (file.cloudinary_resource_type) {
-                      case 'video': %>
-                      <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% break;
-                      case 'image': %>
+                    <% if(file.mime_type.includes('image')) { %>
                         <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% break;
-                      case 'raw': %>
+                    <% } else if (file.mime_type.includes('video')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% } else if (file.mime_type.includes('audio')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% } else if (file.mime_type === 'application/pdf') { %>
+                        <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                    <% } else { %>
                         <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% break;
-                      default:
-                      break; } %>
+                    <% } %>
                   </div>
                   <a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a>
                 </div>
@@ -63,6 +62,10 @@
                   <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
                     <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
                     <button class="download-file-button share-folder-button">Download</button>
+                  </div>
+                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                    <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-file-icon">
+                    <a href="/file/update/<%= file.file_id %>" class="blue">Edit</a>
                   </div>
                   <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
                     <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">

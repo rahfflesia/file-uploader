@@ -7,20 +7,20 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="mh-100dvh flex-column">
-    <%- include("../partials/header") %>
+    <%- include('../partials/header') %>
     <div class="login-form-wrapper flex-column">
-      <form action="/folder/update/" method="post" class="login-form">
-        <h2>Update folder</h2>
+      <form action="/file/update" method="post" class="login-form">
+        <h2>Update file name</h2>
         <div class="form-group">
-          <label for="folder_name">Folder name</label>
+          <label for="file_name">New name</label>
           <input
             type="text"
-            name="folder_name"
-            value="<%= folder.folder_name %>"
+            name="file_name"
+            value="<%= file.file_name %>"
             class="default-input"
           />
         </div>
-        <input type="hidden" name="folder_id" value="<%= folder.folder_id %>" />
+        <input type="hidden" name="file_id" value="<%= file.file_id %>" />
         <button type="submit" class="regular-button">Update</button>
       </form>
     </div>

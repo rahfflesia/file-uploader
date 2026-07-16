@@ -18,6 +18,18 @@ class File {
     });
     return file;
   }
+
+  static async updateFileName(fileData) {
+    const updatedFile = await prisma.files.update({
+      data: {
+        file_name: fileData.file_name,
+      },
+      where: {
+        file_id: parseInt(fileData.file_id),
+      },
+    });
+    return updatedFile;
+  }
 }
 
 module.exports = File;

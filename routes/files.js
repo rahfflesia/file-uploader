@@ -62,6 +62,7 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
     cloudinary_public_id: result.public_id,
     cloudinary_resource_type: result.resource_type,
     bytes: result.bytes,
+    mime_type: req.file.mimetype,
   };
   const uploadedFile = await prisma.files.create({
     data: fileData,
@@ -72,5 +73,9 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
 file.get("/delete/:file_id", fileController.deleteFile);
 
 file.get("/details/:file_id", fileController.getFileDetails);
+
+file.get("/update/:file_id", fileController.getUpdateFileNameView);
+
+file.post("/update", fileController.updateFileName);
 
 module.exports = file;
