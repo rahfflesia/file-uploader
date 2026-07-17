@@ -5,14 +5,21 @@ const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 async function createFolder(req, res) {
   const folderData = {
     folder_name: req.body.folder_name,
-    user_id: 1,
+    user_id: req.session.passport.user,
   };
   await Folder.createFolder(folderData);
   res.redirect("/dashboard");
 }
 
 async function getAllFolderFiles(req, res) {
+  const userId = req.session.passport.user;
   const folderId = req.params.folder_id;
+  const folderData = await Folder.getFolder(folderId);
+
+  if (folderData.user_id !== userId) {
+    return res.status(401).send("<h1>No tienes acceso a este recurso</h1>");
+  }
+
   const folderFiles = (await Folder.getAllFolderFiles(folderId)).map((file) => {
     return {
       ...file,
@@ -28,7 +35,16 @@ async function getAllFolderFiles(req, res) {
 }
 
 async function deleteFolder(req, res) {
+  const userId = req.session.passport.user;
   const folderId = req.params.folder_id;
+  const folder = await Folder.getFolder(folderId);
+
+  if (folder.user_id !== userId) {
+    return res
+      .status(401)
+      .send("<h1>No tienes permiso para borrar esta carpeta</h1>");
+  }
+
   await Folder.deleteFolder(folderId);
   res.status(200).redirect("/dashboard");
 }
