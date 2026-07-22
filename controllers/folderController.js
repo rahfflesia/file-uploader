@@ -3,34 +3,39 @@ const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 
 async function createFolder(req, res) {
+  const parentFolderId = req.body.parent_folder_id
+    ? parseInt(req.body.parent_folder_id)
+    : null;
   const folderData = {
     folder_name: req.body.folder_name,
     user_id: req.session.passport.user,
+    parent_folder_id: parentFolderId,
   };
+
   await Folder.createFolder(folderData);
-  res.redirect("/dashboard");
+
+  if (parentFolderId === null) {
+    return res.redirect("/dashboard");
+  }
+
+  res.redirect(`/folder/files/${req.body.parent_folder_id}`);
 }
 
-async function getAllFolderFiles(req, res) {
+async function getAllFolderElements(req, res) {
   const userId = req.session.passport.user;
-  const folderId = req.params.folder_id;
+  const folderId = parseInt(req.params.folder_id);
   const folderData = await Folder.getFolder(folderId);
 
   if (folderData.user_id !== userId) {
     return res.status(401).send("<h1>No tienes acceso a este recurso</h1>");
   }
 
-  const folderFiles = (await Folder.getAllFolderFiles(folderId)).map((file) => {
-    return {
-      ...file,
-      bytes: convertBytes(file.bytes),
-    };
-  });
-  const folder = await Folder.getFolder(parseInt(folderId));
+  const folderElements = await Folder.getAllElements(folderId);
+  const folder = await Folder.getFolder(folderId);
+
   res.status(200).render("./folders/folderFiles", {
-    files: folderFiles,
+    elements: folderElements,
     folder: folder,
-    errorMessage: undefined,
   });
 }
 
@@ -118,7 +123,7 @@ async function updateFolderName(req, res) {
 
 module.exports = {
   createFolder,
-  getAllFolderFiles,
+  getAllFolderElements,
   deleteFolder,
   shareFolder,
   getSharedFolder,

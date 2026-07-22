@@ -1,0 +1,29 @@
+<dialog class="upload-file-dialog">
+  <div class="flex-between-row">
+    <h2>Upload file</h2>
+    <div class="close-icon">
+      <img
+        src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000"
+        alt="close-icon"
+      />
+    </div>
+  </div>
+  <form
+    action="/file/upload/"
+    method="post"
+    enctype="multipart/form-data"
+    class="file-upload-form flex-column"
+    style="gap: 1rem"
+  >
+    <div class="form-group">
+      <label for="uploaded_file">Select the file you want to upload</label>
+      <input type="file" name="archivo" />
+    </div>
+    <input
+      type="hidden"
+      name="folder_id"
+      value="<%= folder?.folder_id ?? null %>"
+    />
+    <button type="submit" class="regular-button">Upload</button>
+  </form>
+</dialog>

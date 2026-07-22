@@ -21,21 +21,7 @@
         <button class="regular-button" onclick="copyLinkToClipboard()">Copy link to clipboard</button>
       </div>
     </dialog>
-    <dialog class="folder-dialog">
-      <div class="flex-between-row">
-        <h2>Create a new folder</h2>
-        <div class="close-icon grid-center">
-          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
-        </div>
-      </div>
-      <form action="/folder/create" method="post" class="flex-column" style="gap: 1rem;">
-        <div class="form-group">
-          <label for="folder_name">Name</label>
-          <input type="text" name="folder_name" class="default-input"/>
-        </div>
-        <button type="submit" class="regular-button">Create</button>
-      </form>
-    </dialog>
+    <%- include("./partials/createFolderModal") %>
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>
@@ -57,15 +43,19 @@
         <button type="submit" class="regular-button">Share</button>
       </form>
     </dialog>
+    <%- include("./partials/uploadFileModal") %>
     <%- include('./partials/header') %>
     <main class="std-padding dashboard">
       <div class="subheader flex-between-row sm-mb">
         <div style="display: flex; flex-direction: column; gap: .25rem;">
           <% const fullName = locals.currentUser.first_name + ' ' + locals.currentUser.last_name %>
-          <h2><%= fullName %>'s folders</h2>
+          <h2><%= fullName %>'s uploads</h2>
           <span class="gray-text" style="font-size: .8rem;">Manage and organize your storage assets</span>
         </div>
-        <button class="create-folder-button regular-button">Create new folder</button>
+        <div>
+          <button class="create-folder-button regular-button">Create new folder</button>
+          <button class="regular-button upload-file-button">Upload file</button>
+        </div>
       </div>
       <div class="info-cards sm-mb">
         <div class="storage-used" style="gap: .25rem;">
@@ -85,48 +75,60 @@
               <img src="https://img.icons8.com/?size=100&id=FVQqbNWLzhcc&format=png&color=000000" alt="folder-icon">
             </div>
             <div class="flex-column" style="gap: .25rem">
-              <span class="gray-text" style="font-size: .8rem;">TOTAL FOLDERS</span>
-              <span style="font-weight: 500;"><%= folders.length %> Items</span>
+              <span class="gray-text" style="font-size: .8rem;">TOTAL ITEMS</span>
+              <span style="font-weight: 500;"><%= rootElements.length %> Items</span>
             </div>
           </div>
         </div>
       </div>
-      <% if(folders.length > 0) { %>
+      <% if(rootElements.length > 0) { %>
           <div class="table">
             <div class="table-header">
               <div>Name</div>
-              <div>Last access</div>
               <div>Total size</div>
               <div>Actions</div>
             </div>
-            <% folders.forEach((folder) => { %>
+            <% rootElements.forEach((element) => { %>
               <div class="table-row">
                 <div class="folder-wrapper">
                   <div class="folder-icon grid-center">
-                    <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
+                    <% if(element.type === "folder") { %>
+                      <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
+                    <% } else if(element.type === "file") { %>
+                      <% if(element.mime_type.includes('image')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type.includes('video')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type.includes('audio')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type === 'application/pdf') { %>
+                        <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else { %>
+                        <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } %>
+                    <% } %>
                   </div>
-                  <a href="/folder/files/<%= folder.folder_id %>" class="folder-name"><%= folder.folder_name %></a>
+                  <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
                 </div>
-                <span><%= folder.last_used.toLocaleDateString() %></span>
-                <span><%= folder.size %></span>
+                <span><%= element.size %></span>
                 <span style="display: flex; gap: .5rem;">
                   <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
                     <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
-                    <button class="share-folder-button" onclick="shareFolder(<%= folder.folder_id %>)">Share</button>
+                    <button class="share-folder-button" onclick="shareFolder(<%= element.type === 'folder' ? element.folder_id : element.file_id %>)">Share</button>
                   </div>
-                  <% if(folder.share_link !== null) { %>
+                  <% if(element.share_link !== null) { %>
                     <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
                       <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
-                      <button onclick="viewShareLink(<%= JSON.stringify(folder) %>)" class="view-link-button">Link</button>
+                      <button onclick="viewShareLink(<%= JSON.stringify(element) %>)" class="view-link-button">Link</button>
                     </div>
                   <% } %>
                   <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
                     <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-folder-icon">
-                    <a href="/folder/update/<%= folder.folder_id %>" class="blue">Edit</a>
+                    <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
                   </div>
                   <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
                     <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
-                    <a href="/folder/delete/<%= folder.folder_id %>" class="delete">Delete</a>
+                    <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="delete">Delete</a>
                   </div>
                 </span>
               </div>
@@ -147,6 +149,9 @@
       const linkDialog = document.querySelector(".link-dialog");
       const closeLinkDialogButton = document.querySelector(".close-link-dialog");
 
+      const uploadFileButton = document.querySelector(".upload-file-button");
+      const uploadFileModal = document.querySelector(".upload-file-dialog");
+
       closeLinkDialogButton.addEventListener('click', () => {
         linkDialog.close();
       });
@@ -162,6 +167,10 @@
       closeShareFolderDialogButton.addEventListener('click', () => {
         shareFolderDialog.close();
       });
+
+      uploadFileButton.addEventListener('click', () => {
+        uploadFileModal.showModal();
+      }); 
 
       async function copyLinkToClipboard() {
         try {
@@ -185,7 +194,6 @@
       }
 
       function shareFolder(folderId) {
-        console.log("Id del folder a compartir", folderId);
         const folderIdInput = document.querySelector('.folder-id-input');
         shareFolderDialog.showModal();
         folderIdInput.value = folderId;

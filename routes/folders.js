@@ -6,7 +6,7 @@ const folderController = require("../controllers/folderController");
 
 folder.post("/create", folderController.createFolder);
 
-folder.get("/files/:folder_id", folderController.getAllFolderFiles);
+folder.get("/files/:folder_id", folderController.getAllFolderElements);
 
 folder.get("/delete/:folder_id", folderController.deleteFolder);
 

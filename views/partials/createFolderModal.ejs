@@ -1,0 +1,28 @@
+<dialog class="folder-dialog">
+  <div class="flex-between-row">
+    <h2>Create a new folder</h2>
+    <div class="close-icon grid-center">
+      <img
+        src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000"
+        alt="close-icon"
+      />
+    </div>
+  </div>
+  <form
+    action="/folder/create"
+    method="post"
+    class="flex-column"
+    style="gap: 1rem"
+  >
+    <div class="form-group">
+      <label for="folder_name">Name</label>
+      <input type="text" name="folder_name" class="default-input" />
+    </div>
+    <input
+      type="hidden"
+      name="parent_folder_id"
+      value="<%= folder?.folder_id  ?? null %>"
+    />
+    <button type="submit" class="regular-button">Create</button>
+  </form>
+</dialog>

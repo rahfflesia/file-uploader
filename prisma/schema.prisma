@@ -12,22 +12,27 @@ model files {
   file_name                String    @db.VarChar(512)
   url                      String    @db.VarChar(512)
   uploaded_at              DateTime? @default(now()) @db.Timestamptz(6)
-  folder_id                Int
+  folder_id                Int?
   cloudinary_public_id     String?   @db.VarChar(255)
   cloudinary_resource_type String?   @db.VarChar(16)
   bytes                    Int
   mime_type                String?   @db.VarChar(255)
-  folders                  folders   @relation(fields: [folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction)
+  user_id                  Int
+  folders                  folders?  @relation(fields: [folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction)
+  users                    users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "files_user_id")
 }
 
 model folders {
-  folder_id      Int              @id @default(autoincrement())
-  folder_name    String           @db.VarChar(128)
-  last_used      DateTime?        @default(now()) @db.Timestamptz(6)
-  user_id        Int
-  files          files[]
-  users          users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-  shared_folders shared_folders[]
+  folder_id        Int              @id @default(autoincrement())
+  folder_name      String           @db.VarChar(128)
+  last_used        DateTime?        @default(now()) @db.Timestamptz(6)
+  user_id          Int
+  parent_folder_id Int?
+  files            files[]
+  folders          folders?         @relation("foldersTofolders", fields: [parent_folder_id], references: [folder_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_folder_id_parent_folder_id")
+  other_folders    folders[]        @relation("foldersTofolders")
+  users            users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  shared_folders   shared_folders[]
 }
 
 model users {
@@ -37,6 +42,7 @@ model users {
   email          String           @unique @db.VarChar(254)
   password_hash  String           @db.VarChar(64)
   created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  files          files[]
   folders        folders[]
   shared_folders shared_folders[]
 }

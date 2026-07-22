@@ -18,11 +18,13 @@ cloudinary.config({
 });
 
 file.post("/upload", upload.single("archivo"), async (req, res) => {
-  const folderId = parseInt(req.body.folder_id);
+  const folderId = req.body.folder_id ? parseInt(req.body.folder_id) : null;
   const mb = 1048576;
 
+  console.log("Peticion recibida");
+
   // Max size is 100mb for video, for everything else is 10mb
-  if (
+  /*if (
     (!req.file.mimetype.includes("video") &&
       req.file.buffer.length > mb * 10) ||
     (req.file.mimetype.includes("video") && req.file.buffer.length > mb * 100)
@@ -39,7 +41,7 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
         "The file is too large (100 MB Max for video and 10 MB for other type of files)",
       folder_id: folderId,
     });
-  }
+  }*/
 
   const byteArrayBuffer = req.file.buffer;
   const result = await new Promise((resolve, reject) => {
@@ -63,10 +65,16 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
     cloudinary_resource_type: result.resource_type,
     bytes: result.bytes,
     mime_type: req.file.mimetype,
+    user_id: req.session.passport.user,
   };
   const uploadedFile = await prisma.files.create({
     data: fileData,
   });
+
+  if (folderId === null) {
+    return res.status(201).redirect("/dashboard");
+  }
+
   res.status(201).redirect(`/folder/files/${folderId}`);
 });
 

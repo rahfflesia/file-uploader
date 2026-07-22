@@ -30,6 +30,9 @@ async function getUpdateFileNameView(req, res) {
 
 async function updateFileName(req, res) {
   const updatedFile = await File.updateFileName(req.body);
+  if (updatedFile.folder_id === null) {
+    return res.status(200).redirect("/dashboard");
+  }
   res.status(200).redirect(`/folder/files/${updatedFile.folder_id}`);
 }
 

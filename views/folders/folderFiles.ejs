@@ -8,29 +8,18 @@
   </head>
   <body>
     <div class="error-message"></div>
-    <dialog class="upload-file-dialog">
-      <div class="flex-between-row">
-        <h2>Upload file</h2>
-        <div class="close-icon">
-          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
-        </div>
-      </div>
-      <form action="/file/upload/" method="post" enctype="multipart/form-data" class="file-upload-form flex-column" style="gap: 1rem;">
-        <div class="form-group">
-          <label for="uploaded_file">Select the file you want to upload</label>
-          <input type="file" name="archivo">
-        </div>
-        <input type="hidden" name="folder_id" value="<%= folder.folder_id %>">
-        <button type="submit" class="regular-button">Upload</button>
-      </form>
-    </dialog>
+    <%- include("../partials/uploadFileModal") %>
     <%- include('../partials/header') %>
+    <%- include("../partials/createFolderModal") %>
     <main class="std-padding dashboard">
       <div class="flex-between-row sm-mb">
-        <h2><%= folder.folder_name %> files</h2>
-        <button class="upload-file-button regular-button">Upload file</button>
+        <h2><span class="blue"><%= folder.folder_name %></span> <span>content</span></h2>
+        <div>
+          <button class="regular-button create-folder-button">Create new folder</button>
+          <button class="upload-file-button regular-button">Upload file</button>
+        </div>
       </div>
-      <% if(files.length > 0) { %>
+      <% if(elements.length > 0) { %>
         <div class="table">
           <div class="table-header">
             <div>File name</div>
@@ -38,26 +27,29 @@
             <div>Upload date</div>
             <div>Actions</div>
           </div>
-          <% files.forEach((file) => { %>
+          <% elements.forEach((element) => { %>
               <div class="table-row">
                 <div class="file-name-wrapper">
-                  <div class="file-type-icon-wrapper">
-                    <% if(file.mime_type.includes('image')) { %>
+                  <div class="file-type-icon-wrapper folder-icon">
+                    <% if(element.type === "file") { %>
+                      <% if(element.mime_type.includes('image')) { %>
                         <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% } else if (file.mime_type.includes('video')) { %>
+                      <% } else if (element.mime_type.includes('video')) { %>
                         <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% } else if (file.mime_type.includes('audio')) { %>
+                      <% } else if (element.mime_type.includes('audio')) { %>
                         <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% } else if (file.mime_type === 'application/pdf') { %>
+                      <% } else if (element.mime_type === 'application/pdf') { %>
                         <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                    <% } else { %>
+                      <% } else { %>
                         <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } %>
+                    <% } else if (element.type === "folder") { %>
+                        <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
                     <% } %>
                   </div>
-                  <a href="/file/details/<%= file.file_id %>"><%= file.file_name %></a>
+                  <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
                 </div>
-                <div><%= file.bytes %></div>
-                <div><%= file.uploaded_at.toLocaleDateString() %></div>
+                <div><%= element.size %></div>
                 <div class="actions">
                   <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
                     <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
@@ -65,11 +57,11 @@
                   </div>
                   <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
                     <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-file-icon">
-                    <a href="/file/update/<%= file.file_id %>" class="blue">Edit</a>
+                    <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
                   </div>
                   <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
                     <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
-                    <a href="/file/delete/<%= file.file_id %>" class="delete">Delete</a>
+                    <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="delete">Delete</a>
                   </div>
                 </div>
               </div>
@@ -85,10 +77,11 @@
     const uploadFileButton = document.querySelector(".upload-file-button");
     const closeDialogButton = document.querySelector(".close-icon");
 
-    const filesArray = <%- JSON.stringify(files) %>
+    const filesArray = <%- JSON.stringify(elements) %>
     const downloadButtons = document.querySelectorAll(".download-file-button");
 
-    const error = <%- JSON.stringify(errorMessage) %>
+    const createFolderModal = document.querySelector(".folder-dialog");
+    const createFolderButton = document.querySelector(".create-folder-button");
 
     uploadFileButton.addEventListener('click', () => {
       uploadFileDialog.showModal();
@@ -98,31 +91,36 @@
       uploadFileDialog.close();
     });
 
+    createFolderButton.addEventListener('click', () => {
+      createFolderModal.showModal();
+    });
+
     for(let i = 0; i < downloadButtons.length; i++) {
       const downloadButton = downloadButtons[i];
       downloadButton.addEventListener('click', () => {
         const file = filesArray[i];
-        fetch(file.url).then((response) => response.blob()).then((blob) => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = file.file_name;
-            a.click();
-            document.body.appendChild(a);
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }).catch((error) => console.error(error));;
-      });
-    }
 
-    if(error) {
-      const errorMessageContainer = document.querySelector(".error-message");
-      errorMessageContainer.textContent = error;
-      errorMessageContainer.style.display = "block";
-      setTimeout(() => {
-        errorMessageContainer.style.display = 'none';
-      }, 5000);
+        switch(file.type) {
+          case "file":
+              fetch(file.url).then((response) => response.blob()).then((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = file.file_name;
+                a.click();
+                document.body.appendChild(a);
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }).catch((error) => console.error(error));
+            break;
+          case "folder":
+            // to do
+            break;
+          default:
+            console.error("Invalid type");
+        }
+      });
     }
   </script>
 </html>

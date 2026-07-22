@@ -1,4 +1,11 @@
 const prisma = require("../lib/prisma");
+const {
+  convertBytes,
+  formatFiles,
+  formatFolders,
+  getFilesBytes,
+  getFolderBytes,
+} = require("../helpers/helpers");
 
 class Folder {
   static async createFolder(folderData) {
@@ -73,6 +80,69 @@ class Folder {
         folder_id: parseInt(folderData.folder_id),
       },
     });
+  }
+
+  static async getAllRootElements(id) {
+    const userId = parseInt(id);
+    const files = await prisma.files.findMany({
+      where: {
+        folder_id: null,
+        user_id: userId,
+      },
+    });
+
+    const folders = await prisma.folders.findMany({
+      where: {
+        parent_folder_id: null,
+        user_id: userId,
+      },
+      include: {
+        files: {
+          select: {
+            bytes: true,
+          },
+        },
+      },
+    });
+
+    const formattedFiles = formatFiles(files);
+    const formattedFolders = await formatFolders(folders);
+    const filesBytes = getFilesBytes(files);
+    const folderBytes = getFolderBytes(folders);
+    const usedStorage = filesBytes + folderBytes;
+
+    const rootElements = [...formattedFiles, ...formattedFolders];
+    const formattedStorage = convertBytes(usedStorage);
+
+    return { rootElements, formattedStorage };
+  }
+
+  static async getAllElements(id) {
+    const folderId = parseInt(id);
+    const childFolders = await prisma.folders.findMany({
+      where: {
+        parent_folder_id: folderId,
+      },
+      include: {
+        files: {
+          select: {
+            bytes: true,
+          },
+        },
+      },
+    });
+
+    const files = await prisma.files.findMany({
+      where: {
+        folder_id: folderId,
+      },
+    });
+
+    const formattedChildFolders = await formatFolders(childFolders);
+    const formattedFiles = formatFiles(files);
+    const folderElements = [...formattedChildFolders, ...formattedFiles];
+
+    return folderElements;
   }
 }
 
