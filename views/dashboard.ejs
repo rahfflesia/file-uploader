@@ -57,6 +57,9 @@
           <button class="regular-button upload-file-button">Upload file</button>
         </div>
       </div>
+      <div class="sm-mb">
+        <h3>Path <span class="blue"><%= path %></span></h3>
+      </div>
       <div class="info-cards sm-mb">
         <div class="storage-used" style="gap: .25rem;">
           <div style="display: flex; gap: 1rem; align-items: center;">
@@ -112,6 +115,10 @@
                 </div>
                 <span><%= element.size %></span>
                 <span style="display: flex; gap: .5rem;">
+                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                    <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                    <button class="download-file-button share-folder-button">Download</button>
+                  </div>
                   <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
                     <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
                     <button class="share-folder-button" onclick="shareFolder(<%= element.type === 'folder' ? element.folder_id : element.file_id %>)">Share</button>
@@ -152,6 +159,9 @@
       const uploadFileButton = document.querySelector(".upload-file-button");
       const uploadFileModal = document.querySelector(".upload-file-dialog");
 
+      const elementsArray = <%- JSON.stringify(rootElements) %>
+      const downloadButtons = document.querySelectorAll(".download-file-button");
+
       closeLinkDialogButton.addEventListener('click', () => {
         linkDialog.close();
       });
@@ -170,7 +180,21 @@
 
       uploadFileButton.addEventListener('click', () => {
         uploadFileModal.showModal();
-      }); 
+      });
+
+      function download(file) {
+        fetch(file.url).then((response) => response.blob()).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = file.file_name;
+            a.click();
+            document.body.appendChild(a);
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }).catch((error) => console.error(error));
+      }
 
       async function copyLinkToClipboard() {
         try {
@@ -197,6 +221,33 @@
         const folderIdInput = document.querySelector('.folder-id-input');
         shareFolderDialog.showModal();
         folderIdInput.value = folderId;
+      }
+
+      function recurse(folder) {
+        for(const file of folder.files) {
+          download(file);
+        }
+
+        for(const child of folder.childs) {
+          recurse(child);
+        }
+      }
+
+      for(let i = 0; i < downloadButtons.length; i++) {
+        const downloadButton = downloadButtons[i];
+        downloadButton.addEventListener('click', () => {
+          const element = elementsArray[i];
+          switch(element.type) {
+            case 'file':
+              download(element);
+              break;
+            case 'folder':
+              recurse(element);
+              break;
+            default:
+              console.error("Invalid type");
+          }
+        });
       }
     </script>
   </body>

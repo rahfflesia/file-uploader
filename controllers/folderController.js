@@ -33,9 +33,24 @@ async function getAllFolderElements(req, res) {
   const folderElements = await Folder.getAllElements(folderId);
   const folder = await Folder.getFolder(folderId);
 
+  async function getPath() {
+    let currentFolder = folder;
+    let foldersArray = [currentFolder];
+
+    while (currentFolder.parent_folder_id !== null) {
+      currentFolder = await Folder.getFolder(currentFolder.parent_folder_id);
+      foldersArray.push(currentFolder);
+    }
+
+    return foldersArray;
+  }
+
+  const pathArray = await getPath();
+
   res.status(200).render("./folders/folderFiles", {
     elements: folderElements,
     folder: folder,
+    pathArray: pathArray.reverse(),
   });
 }
 

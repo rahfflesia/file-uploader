@@ -31,6 +31,7 @@ async function getDashboard(req, res) {
     rootElements: rootData.rootElements,
     usedStorage: rootData.formattedStorage,
     folder: null,
+    path: "/",
   });
 }
 

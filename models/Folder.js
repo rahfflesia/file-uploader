@@ -42,19 +42,7 @@ class Folder {
   static async deleteFolder(folderId) {
     await prisma.$transaction(async (tx) => {
       const id = parseInt(folderId);
-      await tx.files.deleteMany({
-        where: {
-          folder_id: id,
-        },
-      });
-
-      await tx.shared_folders.deleteMany({
-        where: {
-          folder_id: id,
-        },
-      });
-
-      await tx.folders.delete({
+      await prisma.folders.delete({
         where: {
           folder_id: id,
         },
@@ -82,6 +70,24 @@ class Folder {
     });
   }
 
+  static async getAllFolderChilds(folderId) {
+    const childs = await prisma.folders.findMany({
+      where: {
+        parent_folder_id: parseInt(folderId),
+      },
+      include: {
+        files: {
+          select: {
+            bytes: true,
+            file_name: true,
+            url: true,
+          },
+        },
+      },
+    });
+    return childs;
+  }
+
   static async getAllRootElements(id) {
     const userId = parseInt(id);
     const files = await prisma.files.findMany({
@@ -100,13 +106,39 @@ class Folder {
         files: {
           select: {
             bytes: true,
+            file_name: true,
+            url: true,
           },
         },
       },
     });
 
+    const recurse = async (folder) => {
+      const childs = await this.getAllFolderChilds(folder.folder_id);
+
+      if (childs.length === 0) {
+        return {
+          ...folder,
+          childs: [],
+        };
+      }
+
+      let arr = [];
+      for (const c of childs) {
+        const r = await recurse(c);
+        arr.push(r);
+      }
+
+      return {
+        ...folder,
+        childs: arr,
+      };
+    };
+
+    const foldersWithChilds = await Promise.all(folders.map(await recurse));
+
     const formattedFiles = formatFiles(files);
-    const formattedFolders = await formatFolders(folders);
+    const formattedFolders = await formatFolders(foldersWithChilds);
     const filesBytes = getFilesBytes(files);
     const folderBytes = getFolderBytes(folders);
     const usedStorage = filesBytes + folderBytes;
@@ -127,6 +159,13 @@ class Folder {
         files: {
           select: {
             bytes: true,
+            url: true,
+            file_name: true,
+          },
+        },
+        folders: {
+          select: {
+            folder_name: true,
           },
         },
       },

@@ -19,12 +19,22 @@
           <button class="upload-file-button regular-button">Upload file</button>
         </div>
       </div>
+      <div class="sm-mb">
+        <h3 style="display: flex; gap: .25rem;">
+          <span>Path</span>
+          <div style="display: flex;">
+            <a href="/dashboard" class="blue">/</a>
+            <% pathArray.forEach((folder, index) => { %>
+              <a href=/folder/files/<%= folder.folder_id %>><%= folder.folder_name %>/</a>
+            <% }); %>
+          </div>
+        </h3>
+      </div>
       <% if(elements.length > 0) { %>
         <div class="table">
           <div class="table-header">
             <div>File name</div>
             <div>Size</div>
-            <div>Upload date</div>
             <div>Actions</div>
           </div>
           <% elements.forEach((element) => { %>
@@ -95,6 +105,20 @@
       createFolderModal.showModal();
     });
 
+    function download(file) {
+      fetch(file.url).then((response) => response.blob()).then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = file.file_name;
+          a.click();
+          document.body.appendChild(a);
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }).catch((error) => console.error(error));
+    }
+
     for(let i = 0; i < downloadButtons.length; i++) {
       const downloadButton = downloadButtons[i];
       downloadButton.addEventListener('click', () => {
@@ -102,20 +126,13 @@
 
         switch(file.type) {
           case "file":
-              fetch(file.url).then((response) => response.blob()).then((blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = file.file_name;
-                a.click();
-                document.body.appendChild(a);
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }).catch((error) => console.error(error));
+            download(file);
             break;
           case "folder":
-            // to do
+            console.log(file);
+            for(const f of file.files) {
+              download(f);
+            }
             break;
           default:
             console.error("Invalid type");
