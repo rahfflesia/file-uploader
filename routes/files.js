@@ -86,4 +86,6 @@ file.get("/update/:file_id", fileController.getUpdateFileNameView);
 
 file.post("/update", fileController.updateFileName);
 
+file.post("/share", fileController.shareFile);
+
 module.exports = file;

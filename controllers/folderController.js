@@ -45,12 +45,13 @@ async function getAllFolderElements(req, res) {
     return foldersArray;
   }
 
-  const pathArray = await getPath();
+  const pathArray = (await getPath()).reverse();
 
   res.status(200).render("./folders/folderFiles", {
     elements: folderElements,
     folder: folder,
-    pathArray: pathArray.reverse(),
+    pathArray: pathArray,
+    areDestructiveActionsEnabled: true,
   });
 }
 
@@ -102,24 +103,73 @@ async function shareFolder(req, res) {
 
 async function getSharedFolder(req, res) {
   const uuid = req.params.uuid;
+
   const sharedFolder = await prisma.shared_folders.findUnique({
     where: {
       link_uuid: uuid,
     },
   });
 
-  if (Date.now() > sharedFolder.expires_at.getTime()) {
-    return res.status(410).render("expiredLink");
-  }
-
-  const sharedFolderFiles = await prisma.files.findMany({
+  const sharedFile = await prisma.shared_files.findUnique({
     where: {
-      folder_id: sharedFolder.folder_id,
+      link_uuid: uuid,
     },
   });
-  res
-    .status(200)
-    .render("./folders/sharedFolder", { sharedFolderFiles: sharedFolderFiles });
+
+  const isFolder = sharedFolder !== null && sharedFile === null;
+
+  const owner = await prisma.users.findUnique({
+    where: {
+      user_id: isFolder ? sharedFolder.user_id : sharedFile.user_id,
+    },
+    select: {
+      first_name: true,
+      last_name: true,
+    },
+  });
+
+  const ownerFullName = owner.first_name + " " + owner.last_name;
+
+  if (isFolder) {
+    console.log("Es folder");
+    if (Date.now() > sharedFolder.expires_at.getTime()) {
+      return res.status(410).render("expiredLink");
+    }
+
+    const elements = await Folder.getAllElements(sharedFolder.folder_id);
+
+    return res.status(200).render("./folders/sharedFolder", {
+      elements: elements,
+      type: "folder",
+      areDestructiveActionsEnabled: false,
+      owner: ownerFullName,
+    });
+  } else if (!isFolder) {
+    console.log("No es folder");
+    if (Date.now() > sharedFile.expires_at.getTime()) {
+      return res.status(410).render("expiredLink");
+    }
+
+    const file = await prisma.files.findUnique({
+      where: {
+        file_id: sharedFile.file_id,
+      },
+    });
+
+    const formattedFile = {
+      ...file,
+      size: convertBytes(file.bytes),
+    };
+
+    return res.status(200).render("./folders/sharedFolder", {
+      elements: formattedFile,
+      type: "file",
+      areDestructiveActionsEnabled: false,
+      owner: ownerFullName,
+    });
+  }
+
+  return res.status(404).send("<h1>Link not found</h1>");
 }
 
 async function getUpdateFolderView(req, res) {

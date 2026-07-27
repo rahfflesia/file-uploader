@@ -43,6 +43,27 @@
         <button type="submit" class="regular-button">Share</button>
       </form>
     </dialog>
+    <dialog class="share-file-dialog">
+      <header class="flex-between-row">
+        <h2>Share file</h2>
+        <div class="close-icon close-share-folder grid-center">
+          <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
+        </div>
+      </header>
+      <form action="/file/share" method="post" class="flex-column" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="expiration_days">Select the amount of days you want to share this file for</label>
+          <select name="expiration_days" class="default-input">
+            <option value="1">1 day</option>
+            <option value="7">7 days</option>
+            <option value="15">15 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
+        <input type="hidden" name="file_id" class="file-id-input">
+        <button type="submit" class="regular-button">Share</button>
+      </form>
+    </dialog>
     <%- include("./partials/uploadFileModal") %>
     <%- include('./partials/header') %>
     <main class="std-padding dashboard">
@@ -79,68 +100,13 @@
             </div>
             <div class="flex-column" style="gap: .25rem">
               <span class="gray-text" style="font-size: .8rem;">TOTAL ITEMS</span>
-              <span style="font-weight: 500;"><%= rootElements.length %> Items</span>
+              <span style="font-weight: 500;"><%= elements.length %> Items</span>
             </div>
           </div>
         </div>
       </div>
-      <% if(rootElements.length > 0) { %>
-          <div class="table">
-            <div class="table-header">
-              <div>Name</div>
-              <div>Total size</div>
-              <div>Actions</div>
-            </div>
-            <% rootElements.forEach((element) => { %>
-              <div class="table-row">
-                <div class="folder-wrapper">
-                  <div class="folder-icon grid-center">
-                    <% if(element.type === "folder") { %>
-                      <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
-                    <% } else if(element.type === "file") { %>
-                      <% if(element.mime_type.includes('image')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type.includes('video')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type.includes('audio')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type === 'application/pdf') { %>
-                        <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else { %>
-                        <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } %>
-                    <% } %>
-                  </div>
-                  <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
-                </div>
-                <span><%= element.size %></span>
-                <span style="display: flex; gap: .5rem;">
-                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
-                    <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
-                    <button class="download-file-button share-folder-button">Download</button>
-                  </div>
-                  <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
-                    <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
-                    <button class="share-folder-button" onclick="shareFolder(<%= element.type === 'folder' ? element.folder_id : element.file_id %>)">Share</button>
-                  </div>
-                  <% if(element.share_link !== null) { %>
-                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
-                      <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
-                      <button onclick="viewShareLink(<%= JSON.stringify(element) %>)" class="view-link-button">Link</button>
-                    </div>
-                  <% } %>
-                  <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
-                    <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-folder-icon">
-                    <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
-                  </div>
-                  <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
-                    <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
-                    <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="delete">Delete</a>
-                  </div>
-                </span>
-              </div>
-            <% }); %>
-          </div>
+      <% if(elements.length > 0) { %>
+          <%- include("./partials/table") %>
       <% } else { %>
           <div>You have no created any folders yet</div>
       <% } %>
@@ -153,13 +119,15 @@
       const shareFolderDialog = document.querySelector(".share-folder-dialog");
       const closeShareFolderDialogButton = document.querySelector(".close-share-folder");
 
+      const shareFileDialog = document.querySelector(".share-file-dialog");
+
       const linkDialog = document.querySelector(".link-dialog");
       const closeLinkDialogButton = document.querySelector(".close-link-dialog");
 
       const uploadFileButton = document.querySelector(".upload-file-button");
       const uploadFileModal = document.querySelector(".upload-file-dialog");
 
-      const elementsArray = <%- JSON.stringify(rootElements) %>
+      const elementsArray = <%- JSON.stringify(elements) %>
       const downloadButtons = document.querySelectorAll(".download-file-button");
 
       closeLinkDialogButton.addEventListener('click', () => {
@@ -207,13 +175,13 @@
         }
       }
 
-      function viewShareLink(folder) {
+      function viewShareLink(element) {
         const linkDialog = document.querySelector(".link-dialog");
         const h2 = document.querySelector(".link-dialog h2");
         const linkAnchor = document.querySelector(".folder-link");
-        h2.textContent = `Share ${folder.folder_name} with the following link`;
-        linkAnchor.href = folder.share_link;
-        linkAnchor.textContent = folder.share_link;
+        h2.textContent = `Share ${element.type === "folder" ? element.folder_name : element.file_name} with the following link`;
+        linkAnchor.href = element.share_link;
+        linkAnchor.textContent = element.share_link;
         linkDialog.showModal();
       }
 
@@ -221,6 +189,12 @@
         const folderIdInput = document.querySelector('.folder-id-input');
         shareFolderDialog.showModal();
         folderIdInput.value = folderId;
+      }
+
+      function shareFile(fileId) {
+        const fileIdInput = document.querySelector('.file-id-input');
+        shareFileDialog.showModal();
+        fileIdInput.value = fileId;
       }
 
       function recurse(folder) {

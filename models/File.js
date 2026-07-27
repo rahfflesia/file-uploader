@@ -30,6 +30,10 @@ class File {
     });
     return updatedFile;
   }
+
+  static async shareFile() {}
+
+  static async getSharedFiles(userId) {}
 }
 
 module.exports = File;

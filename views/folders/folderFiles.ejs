@@ -24,59 +24,14 @@
           <span>Path</span>
           <div style="display: flex;">
             <a href="/dashboard" class="blue">/</a>
-            <% pathArray.forEach((folder, index) => { %>
+            <% pathArray.forEach((folder) => { %>
               <a href=/folder/files/<%= folder.folder_id %>><%= folder.folder_name %>/</a>
             <% }); %>
           </div>
         </h3>
       </div>
       <% if(elements.length > 0) { %>
-        <div class="table">
-          <div class="table-header">
-            <div>File name</div>
-            <div>Size</div>
-            <div>Actions</div>
-          </div>
-          <% elements.forEach((element) => { %>
-              <div class="table-row">
-                <div class="file-name-wrapper">
-                  <div class="file-type-icon-wrapper folder-icon">
-                    <% if(element.type === "file") { %>
-                      <% if(element.mime_type.includes('image')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type.includes('video')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type.includes('audio')) { %>
-                        <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else if (element.mime_type === 'application/pdf') { %>
-                        <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } else { %>
-                        <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
-                      <% } %>
-                    <% } else if (element.type === "folder") { %>
-                        <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
-                    <% } %>
-                  </div>
-                  <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
-                </div>
-                <div><%= element.size %></div>
-                <div class="actions">
-                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
-                    <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
-                    <button class="download-file-button share-folder-button">Download</button>
-                  </div>
-                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
-                    <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-file-icon">
-                    <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
-                  </div>
-                  <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
-                    <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
-                    <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="delete">Delete</a>
-                  </div>
-                </div>
-              </div>
-          <% }); %>
-        </div>
+        <%- include("../partials/table") %>
       <% } else { %>
           <div>This folder has no files</div>
       <% } %>

@@ -1,0 +1,65 @@
+<div class="table">
+    <div class="table-header">
+        <div>Name</div>
+        <div>Total size</div>
+        <div>Actions</div>
+    </div>
+    <% elements.forEach((element) => { %>
+        <div class="table-row">
+            <div class="folder-wrapper">
+                <div class="folder-icon grid-center">
+                    <% if(element.type === "folder") { %>
+                      <img src="https://img.icons8.com/?size=100&id=82843&format=png&color=1b71e1" alt="folder-icon">
+                    <% } else if(element.type === "file") { %>
+                      <% if(element.mime_type.includes('image')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=yF8LPIFelJU7&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type.includes('video')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=99cTBfGlewZU&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type.includes('audio')) { %>
+                        <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else if (element.mime_type === 'application/pdf') { %>
+                        <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } else { %>
+                        <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                      <% } %>
+                    <% } %>
+                </div>
+                <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
+            </div>
+            <span><%= element.size %></span>
+            <span style="display: flex; gap: .5rem;">
+                <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                    <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                    <button class="download-file-button share-folder-button">Download</button>
+                </div>
+                <% if(areDestructiveActionsEnabled) { %>
+                    <% if(element.type === "folder") { %>
+                    <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
+                      <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
+                      <button class="share-folder-button" onclick="shareFolder(<%= element.folder_id %>)">Share</button>
+                    </div>
+                    <% } else if (element.type === "file") { %> 
+                        <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
+                        <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
+                        <button class="share-folder-button" onclick="shareFile(<%= element.file_id %>)">Share</button>
+                        </div>
+                    <% } %>
+                    <% if(element.share_link !== null) { %>
+                        <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
+                        <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
+                        <button onclick="viewShareLink(<%= JSON.stringify(element) %>)" class="view-link-button">Link</button>
+                        </div>
+                    <% } %>
+                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
+                        <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-folder-icon">
+                        <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
+                    </div>
+                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
+                        <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
+                        <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/delete/${element.file_id}` %>" class="delete">Delete</a>
+                    </div>
+                <% } %>
+            </span>
+        </div>
+    <% }); %>
+</div>

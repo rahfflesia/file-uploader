@@ -6,6 +6,7 @@ const {
   getFilesBytes,
   getFolderBytes,
 } = require("../helpers/helpers");
+const cloudinary = require("cloudinary").v2;
 
 class Folder {
   static async createFolder(folderData) {
@@ -40,13 +41,34 @@ class Folder {
   }
 
   static async deleteFolder(folderId) {
-    await prisma.$transaction(async (tx) => {
-      const id = parseInt(folderId);
-      await prisma.folders.delete({
-        where: {
-          folder_id: id,
-        },
-      });
+    const deleteFilesRecursively = async (folderId) => {
+      const children = await this.getAllFolderChilds(folderId);
+      const files = await this.getAllFolderFiles(folderId);
+
+      if (files.length === 0 && children.length === 0) {
+        return;
+      }
+
+      for (const child of children) {
+        await deleteFilesRecursively(child.folder_id);
+      }
+
+      for (const file of files) {
+        await cloudinary.uploader.destroy(file.cloudinary_public_id, {
+          resource_type: file.cloudinary_resource_type,
+          invalidate: true,
+        });
+      }
+    };
+
+    const id = parseInt(folderId);
+
+    await deleteFilesRecursively(id);
+
+    await prisma.folders.delete({
+      where: {
+        folder_id: id,
+      },
     });
   }
 
@@ -137,7 +159,7 @@ class Folder {
 
     const foldersWithChilds = await Promise.all(folders.map(await recurse));
 
-    const formattedFiles = formatFiles(files);
+    const formattedFiles = await formatFiles(files);
     const formattedFolders = await formatFolders(foldersWithChilds);
     const filesBytes = getFilesBytes(files);
     const folderBytes = getFolderBytes(folders);
@@ -178,7 +200,7 @@ class Folder {
     });
 
     const formattedChildFolders = await formatFolders(childFolders);
-    const formattedFiles = formatFiles(files);
+    const formattedFiles = await formatFiles(files);
     const folderElements = [...formattedChildFolders, ...formattedFiles];
 
     return folderElements;

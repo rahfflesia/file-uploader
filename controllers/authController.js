@@ -28,10 +28,11 @@ async function getDashboard(req, res) {
   const userId = req.session.passport.user;
   const rootData = await Folder.getAllRootElements(userId);
   res.status(200).render("dashboard", {
-    rootElements: rootData.rootElements,
+    elements: rootData.rootElements,
     usedStorage: rootData.formattedStorage,
     folder: null,
     path: "/",
+    areDestructiveActionsEnabled: true,
   });
 }
 

@@ -31,14 +31,43 @@ function isSharedFolder(arr) {
   return false;
 }
 
-function formatFiles(filesArray) {
-  const formattedFiles = filesArray.map((file) => {
-    return {
-      ...file,
-      type: "file",
-      size: convertBytes(file.bytes),
-    };
-  });
+function isSharedFile(filesArray) {
+  for (const file of filesArray) {
+    if (Date.now() < file.expires_at.getTime()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function formatFiles(filesArray) {
+  const formattedFiles = await Promise.all(
+    filesArray.map(async (file) => {
+      const fileHistory = await prisma.shared_files.findMany({
+        where: {
+          file_id: file.file_id,
+        },
+      });
+
+      let linkUUID = null;
+      for (const data of fileHistory) {
+        if (Date.now() <= data.expires_at.getTime()) {
+          linkUUID = data.link_uuid;
+        }
+      }
+
+      return {
+        ...file,
+        type: "file",
+        size: convertBytes(file.bytes),
+        share_link:
+          linkUUID !== null
+            ? `http://localhost:8080/folder/share/${linkUUID}`
+            : linkUUID,
+      };
+    }),
+  );
   return formattedFiles;
 }
 
@@ -103,4 +132,5 @@ module.exports = {
   formatFolders,
   getFilesBytes,
   getFolderBytes,
+  isSharedFile,
 };
