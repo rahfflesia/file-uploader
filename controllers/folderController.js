@@ -95,10 +95,24 @@ async function shareFolder(req, res) {
     expires_at: expirationDate,
   };
 
-  await prisma.shared_folders.create({
+  const sharedFolder = await prisma.shared_folders.create({
     data: data,
+    include: {
+      folders: {
+        select: {
+          parent_folder_id: true,
+        },
+      },
+    },
   });
-  res.status(201).redirect("/dashboard");
+
+  if (sharedFolder.folders.parent_folder_id === null) {
+    return res.status(201).redirect("/dashboard");
+  }
+
+  res
+    .status(201)
+    .redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
 }
 
 async function getSharedFolder(req, res) {

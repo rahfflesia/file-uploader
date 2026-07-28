@@ -32,8 +32,9 @@
                     <audio src="<%= elements.url %>" controls></audio>
                   </div>
                 <% } else if(elements.mime_type.includes('application/pdf')) { %>
-                  <!-- Aquí no se muy bien que usaré -->
-                  <embed src="<%= elements.url %>" type="application/pdf">
+                 <div class="file-type-icon-wrapper">
+                    <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
+                </div>
                 <% } else { %>
                   <div class="file-type-icon-wrapper">
                     <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
@@ -53,13 +54,11 @@
     </main>
   </body>
   <script>
-  
-    /*const downloadButtons = document.querySelectorAll(".download-file-button");
+    const downloadButtons = document.querySelectorAll(".download-file-button");
+    const elementType = <%- JSON.stringify(type) %>
+    const elementsObj = <%- JSON.stringify(elements) %>
 
-    for(let i = 0; i < downloadButtons.length; i++) {
-      const downloadButton = downloadButtons[i];
-      downloadButton.addEventListener('click', () => {
-        const file = filesArray[i];
+    function download(file) {
         fetch(file.url).then((response) => response.blob()).then((blob) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -68,9 +67,48 @@
             a.download = file.file_name;
             a.click();
             document.body.appendChild(a);
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }).catch((error) => console.error(error));;
-      });
-    }*/
+          }).catch((error) => console.error(error));
+      }
+
+      function recurse(folder) {
+        for(const file of folder.files) {
+          download(file);
+        }
+
+        for(const child of folder.childs) {
+          recurse(child);
+        }
+      }
+
+    switch(elementType) {
+      case 'folder':
+          for(let i = 0; i < downloadButtons.length; i++) {
+            const downloadButton = downloadButtons[i];
+            downloadButton.addEventListener('click', () => {
+              const element = elementsObj[i];
+              switch(element.type) {
+                case 'file':
+                  download(element);
+                  break;
+                case 'folder':
+                  recurse(element);
+                  break;
+                default:
+                  console.error("Invalid type");
+              }
+            });
+          }
+        break;
+      case 'file':
+        const downloadFileButton = document.querySelector(".download-button-file-details");
+        downloadFileButton.addEventListener('click', () => {
+          download(elementsObj);
+        });
+        break;
+      default:
+        console.error("Invalid type");
+    }
   </script>
 </html>

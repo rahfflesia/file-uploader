@@ -41,71 +41,6 @@ function isSharedFile(filesArray) {
   return false;
 }
 
-async function formatFiles(filesArray) {
-  const formattedFiles = await Promise.all(
-    filesArray.map(async (file) => {
-      const fileHistory = await prisma.shared_files.findMany({
-        where: {
-          file_id: file.file_id,
-        },
-      });
-
-      let linkUUID = null;
-      for (const data of fileHistory) {
-        if (Date.now() <= data.expires_at.getTime()) {
-          linkUUID = data.link_uuid;
-        }
-      }
-
-      return {
-        ...file,
-        type: "file",
-        size: convertBytes(file.bytes),
-        share_link:
-          linkUUID !== null
-            ? `http://localhost:8080/folder/share/${linkUUID}`
-            : linkUUID,
-      };
-    }),
-  );
-  return formattedFiles;
-}
-
-async function formatFolders(foldersArray) {
-  const formattedFolders = await Promise.all(
-    foldersArray.map(async (folder) => {
-      let totalSize = folder.files.reduce((total, current) => {
-        return total + current.bytes;
-      }, 0);
-
-      const folderHistory = await prisma.shared_folders.findMany({
-        where: {
-          folder_id: folder.folder_id,
-        },
-      });
-
-      let linkUUID = null;
-      for (const data of folderHistory) {
-        // Found a not expired link
-        if (Date.now() <= data.expires_at.getTime()) {
-          linkUUID = data.link_uuid;
-        }
-      }
-
-      return {
-        ...folder,
-        type: "folder",
-        size: convertBytes(totalSize),
-        share_link:
-          linkUUID !== null
-            ? `http://localhost:8080/folder/share/${linkUUID}`
-            : linkUUID,
-      };
-    }),
-  );
-  return formattedFolders;
-}
-
 function getFilesBytes(filesArray) {
   let bytes = 0;
   filesArray.forEach((file) => {
@@ -128,8 +63,6 @@ function getFolderBytes(foldersArray) {
 module.exports = {
   convertBytes,
   isSharedFolder,
-  formatFiles,
-  formatFolders,
   getFilesBytes,
   getFolderBytes,
   isSharedFile,

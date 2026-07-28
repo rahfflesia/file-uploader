@@ -311,15 +311,22 @@ label {
 }
 
 .error-message {
-  position: absolute;
-  background-color: rgb(229, 65, 65);
+  position: fixed;
+  background-color: rgb(255, 215, 215);
   z-index: 1;
-  color: white;
+  color: rgb(255, 65, 65);
   border-radius: var(--border-radius);
   right: 0;
   margin: 1rem;
   padding: 0.5rem 1rem;
-  display: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: transform 400ms ease 0ms;
+  transform: translateX(110%);
+}
+
+.slide {
+  transform: translateX(0);
 }
 
 .app-name span {

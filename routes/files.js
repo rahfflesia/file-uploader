@@ -6,10 +6,13 @@ const upload = multer({ storage: storage });
 const cloudinary = require("cloudinary").v2;
 const Folder = require("../models/Folder");
 const { convertBytes } = require("../helpers/helpers");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const prisma = require("../lib/prisma");
 
 const fileController = require("../controllers/fileController");
+
+file.use(isAuthenticated);
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -20,8 +23,6 @@ cloudinary.config({
 file.post("/upload", upload.single("archivo"), async (req, res) => {
   const folderId = req.body.folder_id ? parseInt(req.body.folder_id) : null;
   const mb = 1048576;
-
-  console.log("Peticion recibida");
 
   // Max size is 100mb for video, for everything else is 10mb
   /*if (

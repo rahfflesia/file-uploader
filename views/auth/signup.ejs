@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="mh-100dvh flex-column">
+    <div class="error-message"></div>
     <div class="login-form-wrapper flex-column">
       <div class="app-name-wrapper">
         <h1 class="app-name"></h1>
@@ -20,19 +21,46 @@
         </div>
         <div class="form-group">
           <label for="first_name">First name</label>
-          <input type="text" name="first_name" class="default-input" />
+          <input
+            type="text"
+            name="first_name"
+            class="default-input"
+            required
+            minlength="2"
+            maxlength="512"
+          />
         </div>
         <div class="form-group">
           <label for="last_name">Last name</label>
-          <input type="text" name="last_name" class="default-input" />
+          <input
+            type="text"
+            name="last_name"
+            class="default-input"
+            required
+            minlength="2"
+            maxlength="512"
+          />
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" name="email" class="default-input" />
+          <input
+            type="email"
+            name="email"
+            class="default-input"
+            required
+            minlength="4"
+            maxlength="320"
+          />
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" name="password" class="default-input" />
+          <input
+            type="password"
+            name="password"
+            class="default-input"
+            required
+            minlength="8"
+          />
         </div>
         <div class="form-group">
           <label for="confirmed_password">Confirm password</label>
@@ -40,6 +68,8 @@
             type="password"
             name="confirmed_password"
             class="default-input"
+            required
+            minlength="8"
           />
         </div>
         <button type="submit" class="regular-button">Sign up</button>
@@ -53,15 +83,25 @@
     document.addEventListener("DOMContentLoaded", () => {
       const appNameContainer = document.querySelector(".app-name");
       const text = "FileUploader";
-      let animationDelayMs = 500;
+      let animationDelayMs = 300;
       for (let i = 0; i < text.length; i++) {
         const currentLetter = text[i];
         const span = document.createElement("span");
         span.style.animation = `fall 500ms ${animationDelayMs}ms ease 1 forwards`;
         span.textContent = currentLetter;
         appNameContainer.appendChild(span);
-        animationDelayMs += 100;
+        animationDelayMs += 50;
       }
     });
+
+    const e = <%- JSON.stringify(error ?? null) %>
+    if(e) {
+      const errorMessageContainer = document.querySelector(".error-message");
+      errorMessageContainer.classList.toggle('slide');
+      errorMessageContainer.textContent = e;
+      setTimeout(() => {
+        errorMessageContainer.classList.toggle('slide');
+      }, 4000);
+    }
   </script>
 </html>

@@ -20,11 +20,24 @@
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" name="username" class="default-input" />
+          <input
+            type="email"
+            name="username"
+            class="default-input"
+            required
+            minlength="4"
+            maxlength="320"
+          />
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" name="password" class="default-input" />
+          <input
+            type="password"
+            name="password"
+            class="default-input"
+            required
+            minlength="8"
+          />
         </div>
         <button type="submit" class="regular-button">Log in</button>
         <span class="gray-text" style="text-align: center"

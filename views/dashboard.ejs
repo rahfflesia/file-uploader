@@ -46,7 +46,7 @@
     <dialog class="share-file-dialog">
       <header class="flex-between-row">
         <h2>Share file</h2>
-        <div class="close-icon close-share-folder grid-center">
+        <div class="close-icon close-share-file grid-center">
           <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
         </div>
       </header>
@@ -114,18 +114,20 @@
     <script>
       const folderDialog = document.querySelector(".folder-dialog");
       const createFolderButton = document.querySelector(".create-folder-button");
-      const closeIcon = document.querySelector(".close-icon");
+      const closeFolderDialogButton = document.querySelector(".close-folder-dialog");
+
+      const shareFileDialog = document.querySelector(".share-file-dialog");
+      const closeShareFileDialogButton = document.querySelector(".close-share-file");
 
       const shareFolderDialog = document.querySelector(".share-folder-dialog");
       const closeShareFolderDialogButton = document.querySelector(".close-share-folder");
-
-      const shareFileDialog = document.querySelector(".share-file-dialog");
 
       const linkDialog = document.querySelector(".link-dialog");
       const closeLinkDialogButton = document.querySelector(".close-link-dialog");
 
       const uploadFileButton = document.querySelector(".upload-file-button");
       const uploadFileModal = document.querySelector(".upload-file-dialog");
+      const closeUploadDialogButton = document.querySelector(".close-upload-file-dialog");
 
       const elementsArray = <%- JSON.stringify(elements) %>
       const downloadButtons = document.querySelectorAll(".download-file-button");
@@ -138,7 +140,7 @@
         folderDialog.showModal();
       });
 
-      closeIcon.addEventListener('click', () => {
+      closeFolderDialogButton.addEventListener('click', () => {
         folderDialog.close();
       });
 
@@ -148,6 +150,14 @@
 
       uploadFileButton.addEventListener('click', () => {
         uploadFileModal.showModal();
+      });
+
+      closeUploadDialogButton.addEventListener('click', () => {
+        uploadFileModal.close();
+      });
+
+      closeShareFileDialogButton.addEventListener('click', () => {
+        shareFileDialog.close();
       });
 
       function download(file) {

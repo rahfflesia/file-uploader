@@ -66,11 +66,22 @@ async function shareFile(req, res) {
     expires_at: expirationDate,
   };
 
-  await prisma.shared_files.create({
+  const sharedFile = await prisma.shared_files.create({
     data: data,
+    include: {
+      files: {
+        select: {
+          folder_id: true,
+        },
+      },
+    },
   });
 
-  res.status(201).redirect("/dashboard");
+  if (sharedFile.files.folder_id === null) {
+    return res.status(201).redirect("/dashboard");
+  }
+
+  res.status(201).redirect(`/folder/files/${sharedFile.files.folder_id}`);
 }
 
 async function getSharedFiles(req, res) {}

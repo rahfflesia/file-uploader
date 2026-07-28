@@ -1,10 +1,15 @@
 <header class="flex-between-row fu-header std-padding">
   <h2 style="font-weight: bolder" class="blue">FileUploader</h2>
   <div style="display: flex; gap: 0.75rem; align-items: center">
-    <span class="full-name"
-      ><%= locals.currentUser.first_name + ' ' + locals.currentUser.last_name
-      %></span
-    >
-    <a href="/auth/log-out" class="logout">Log out</a>
+    <% if(locals.currentUser) { %>
+      <% const fullName = locals.currentUser.first_name + ' ' +
+      locals.currentUser.last_name %>
+      <span class="full-name"
+      ><%= fullName %></span
+      >
+      <a href="/auth/log-out" class="logout">Log out</a>
+    <% } else { %>
+      <a href="/auth/log-in" class="logout">Log in</a>
+    <% } %>
   </div>
 </header>

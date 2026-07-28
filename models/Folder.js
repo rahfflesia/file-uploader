@@ -1,8 +1,6 @@
 const prisma = require("../lib/prisma");
 const {
   convertBytes,
-  formatFiles,
-  formatFolders,
   getFilesBytes,
   getFolderBytes,
 } = require("../helpers/helpers");
@@ -159,8 +157,8 @@ class Folder {
 
     const foldersWithChilds = await Promise.all(folders.map(await recurse));
 
-    const formattedFiles = await formatFiles(files);
-    const formattedFolders = await formatFolders(foldersWithChilds);
+    const formattedFiles = await this.formatFiles(files);
+    const formattedFolders = await this.formatFolders(foldersWithChilds);
     const filesBytes = getFilesBytes(files);
     const folderBytes = getFolderBytes(folders);
     const usedStorage = filesBytes + folderBytes;
@@ -199,11 +197,95 @@ class Folder {
       },
     });
 
-    const formattedChildFolders = await formatFolders(childFolders);
-    const formattedFiles = await formatFiles(files);
+    const formattedChildFolders = await this.formatFolders(childFolders);
+    const formattedFiles = await this.formatFiles(files);
     const folderElements = [...formattedChildFolders, ...formattedFiles];
 
     return folderElements;
+  }
+
+  static async calculateSize(folder) {
+    const id = folder.folder_id;
+    const files = await Folder.getAllFolderFiles(id);
+    const children = await Folder.getAllFolderChilds(id);
+
+    if (children.length === 0 && files.length === 0) {
+      return 0;
+    }
+
+    let totalSize = 0;
+    for (const child of children) {
+      totalSize += await this.calculateSize(child);
+    }
+
+    for (const file of files) {
+      totalSize += file.bytes;
+    }
+
+    return totalSize;
+  }
+
+  static async formatFiles(files) {
+    const formattedFiles = await Promise.all(
+      files.map(async (file) => {
+        const fileHistory = await prisma.shared_files.findMany({
+          where: {
+            file_id: file.file_id,
+          },
+        });
+
+        let linkUUID = null;
+        for (const data of fileHistory) {
+          if (Date.now() <= data.expires_at.getTime()) {
+            linkUUID = data.link_uuid;
+          }
+        }
+
+        return {
+          ...file,
+          type: "file",
+          size: convertBytes(file.bytes),
+          share_link:
+            linkUUID !== null
+              ? `http://localhost:8080/folder/share/${linkUUID}`
+              : linkUUID,
+        };
+      }),
+    );
+    return formattedFiles;
+  }
+
+  static async formatFolders(folder) {
+    const formattedFolders = await Promise.all(
+      folder.map(async (folder) => {
+        let size = await this.calculateSize(folder);
+
+        const folderHistory = await prisma.shared_folders.findMany({
+          where: {
+            folder_id: folder.folder_id,
+          },
+        });
+
+        let linkUUID = null;
+        for (const data of folderHistory) {
+          // Found a not expired link
+          if (Date.now() <= data.expires_at.getTime()) {
+            linkUUID = data.link_uuid;
+          }
+        }
+
+        return {
+          ...folder,
+          type: "folder",
+          size: convertBytes(size),
+          share_link:
+            linkUUID !== null
+              ? `http://localhost:8080/folder/share/${linkUUID}`
+              : linkUUID,
+        };
+      }),
+    );
+    return formattedFolders;
   }
 }
 

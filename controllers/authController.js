@@ -9,10 +9,22 @@ async function getLogin(req, res) {
 }
 
 async function getSignUp(req, res) {
-  res.status(200).render("./auth/signup");
+  res.status(200).render("./auth/signup", { error: null });
 }
 
 async function postSignup(req, res) {
+  const password = req.body.password;
+  const confirmedPassword = req.body.confirmed_password;
+  const email = req.body.email;
+
+  if (password !== confirmedPassword) {
+    return res.render("./auth/signup", { error: "Passwords do not match" });
+  }
+
+  if (await User.findUserByEmail(email)) {
+    return res.render("./auth/signup", { error: "Email already registered" });
+  }
+
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const signUpData = {
     first_name: req.body.first_name,
@@ -20,7 +32,15 @@ async function postSignup(req, res) {
     email: req.body.username,
     password_hash: hashedPassword,
   };
-  await User.createUser(signUpData);
+
+  const registeredUser = await User.createUser(signUpData);
+
+  if (!registeredUser) {
+    return res.render("./auth/signup", {
+      error: "An error ocurred during sign up, please try again",
+    });
+  }
+
   res.status(201).redirect("/auth/log-in");
 }
 

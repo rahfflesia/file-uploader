@@ -5,6 +5,12 @@ const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
+const {
+  validateSignUp,
+  validateLogIn,
+} = require("../validators/authValidators");
+const { isBadRequest } = require("../middleware/errorMiddleware");
+
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
@@ -41,19 +47,19 @@ passport.deserializeUser(async (id, done) => {
 
 const authController = require("../controllers/authController");
 
-auth.use((req, res, next) => {
-  console.log(req);
-  next();
-});
-
 auth.get("/log-in", authController.getLogin);
 
 auth.get("/sign-up", authController.getSignUp);
 
-auth.post("/sign-up", authController.postSignup);
+auth.post(
+  "/sign-up",
+  [...validateSignUp(), isBadRequest],
+  authController.postSignup,
+);
 
 auth.post(
   "/log-in",
+  [...validateLogIn(), isBadRequest],
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/log-in",
