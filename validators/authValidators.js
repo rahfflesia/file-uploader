@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+const User = require("../models/User");
 
 function validateSignUp() {
   return [
@@ -8,7 +9,7 @@ function validateSignUp() {
       .trim()
       .notEmpty()
       .withMessage("The first name cannot be empty")
-      .isAlpha("en-US", { ignore: " " })
+      .isAlpha("es-ES", { ignore: " " })
       .withMessage("The first name can only containt letters and whitespace")
       .isLength({ min: 2, max: 512 })
       .withMessage(
@@ -20,7 +21,7 @@ function validateSignUp() {
       .trim()
       .notEmpty()
       .withMessage("The last name cannot be empty")
-      .isAlpha("en-US")
+      .isAlpha("es-ES", { ignore: " " })
       .withMessage("The last name can only contain letters and whitespace")
       .isLength({ min: 2, max: 512 })
       .withMessage("The last name length must be between 2 and 512 characters"),
@@ -33,7 +34,15 @@ function validateSignUp() {
       .isEmail()
       .withMessage("Invalid email")
       .isLength({ min: 4, max: 320 })
-      .withMessage("The email length must be between 4 and 320 characters"),
+      .withMessage("The email length must be between 4 and 320 characters")
+      .custom(async (email) => {
+        const user = await User.findUserByEmail(email);
+
+        if (user) {
+          throw new Error("Email already in use");
+        }
+      })
+      .withMessage("That email is already in use"),
     body("password")
       .isString()
       .withMessage("The password must be a string")
@@ -41,7 +50,11 @@ function validateSignUp() {
       .notEmpty()
       .withMessage("The password cannot be empty")
       .isLength({ min: 8 })
-      .withMessage("The password must be at least 8 characters long"),
+      .withMessage("The password must be at least 8 characters long")
+      .custom((password, { req }) => {
+        return password === req.body.confirmed_password;
+      })
+      .withMessage("Passwords do not match"),
     body("confirmed_password")
       .isString()
       .withMessage("The confirmed password must be a string")

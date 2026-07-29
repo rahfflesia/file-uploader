@@ -5,6 +5,7 @@ const prisma = require("./lib/prisma");
 const passport = require("passport");
 const session = require("express-session");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
+const flash = require("connect-flash");
 
 const auth = require("./routes/auth");
 const folder = require("./routes/folders");
@@ -36,10 +37,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(assetsPath));
 app.use(passport.session());
+app.use(flash());
 
 // Add the current user to the response
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
+  res.locals.errors = req.flash("errors");
   next();
 });
 

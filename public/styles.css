@@ -318,11 +318,42 @@ label {
   border-radius: var(--border-radius);
   right: 0;
   margin: 1rem;
-  padding: 0.5rem 1rem;
+  padding: var(--padding);
   font-weight: 500;
   font-size: 1.05rem;
   transition: transform 400ms ease 0ms;
   transform: translateX(110%);
+  max-width: 400px;
+}
+
+.inner-error-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.main-error-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-count {
+  font-size: 0.8rem;
+}
+
+.message {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.previous,
+.next {
+  background-color: rgb(255, 65, 65);
+  color: rgb(255, 215, 215);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  cursor: pointer;
 }
 
 .slide {

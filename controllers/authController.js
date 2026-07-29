@@ -17,14 +17,6 @@ async function postSignup(req, res) {
   const confirmedPassword = req.body.confirmed_password;
   const email = req.body.email;
 
-  if (password !== confirmedPassword) {
-    return res.render("./auth/signup", { error: "Passwords do not match" });
-  }
-
-  if (await User.findUserByEmail(email)) {
-    return res.render("./auth/signup", { error: "Email already registered" });
-  }
-
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const signUpData = {
     first_name: req.body.first_name,

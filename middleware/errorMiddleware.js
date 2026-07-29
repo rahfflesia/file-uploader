@@ -1,15 +1,18 @@
 const { validationResult } = require("express-validator");
 
-function isBadRequest(req, res, next) {
-  const result = validationResult(req);
+function handleValidationErrors(route) {
+  return (req, res, next) => {
+    const result = validationResult(req);
 
-  if (!result.isEmpty()) {
-    return res.status(400).send("<h1>Bad request</h1>");
-  }
+    if (!result.isEmpty()) {
+      req.flash("errors", result.array());
+      return res.status(400).redirect(route);
+    }
 
-  next();
+    next();
+  };
 }
 
 module.exports = {
-  isBadRequest,
+  handleValidationErrors,
 };

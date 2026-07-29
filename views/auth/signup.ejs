@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="mh-100dvh flex-column">
-    <div class="error-message"></div>
+    <%- include('../partials/errorToast') %>
     <div class="login-form-wrapper flex-column">
       <div class="app-name-wrapper">
         <h1 class="app-name"></h1>
@@ -93,15 +93,5 @@
         animationDelayMs += 50;
       }
     });
-
-    const e = <%- JSON.stringify(error ?? null) %>
-    if(e) {
-      const errorMessageContainer = document.querySelector(".error-message");
-      errorMessageContainer.classList.toggle('slide');
-      errorMessageContainer.textContent = e;
-      setTimeout(() => {
-        errorMessageContainer.classList.toggle('slide');
-      }, 4000);
-    }
   </script>
 </html>

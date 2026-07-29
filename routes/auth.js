@@ -9,7 +9,7 @@ const {
   validateSignUp,
   validateLogIn,
 } = require("../validators/authValidators");
-const { isBadRequest } = require("../middleware/errorMiddleware");
+const { handleValidationErrors } = require("../middleware/errorMiddleware");
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -53,13 +53,13 @@ auth.get("/sign-up", authController.getSignUp);
 
 auth.post(
   "/sign-up",
-  [...validateSignUp(), isBadRequest],
+  [...validateSignUp(), handleValidationErrors("/auth/sign-up")],
   authController.postSignup,
 );
 
 auth.post(
   "/log-in",
-  [...validateLogIn(), isBadRequest],
+  [...validateLogIn(), handleValidationErrors("/auth/log-in")],
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/log-in",
