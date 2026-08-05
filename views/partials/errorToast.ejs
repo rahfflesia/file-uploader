@@ -11,11 +11,12 @@
 <script defer>
   const e = <%- JSON.stringify(locals.errors ?? null) %>
 
+  console.log(e);
+
   let index = 0;
   let timeoutId = 0;
 
   if(e && e.length > 0) {
-    console.log(e);
 
     const errorMessageContainer = document.querySelector(".error-message");
     const previous = document.querySelector(".previous");
@@ -27,14 +28,12 @@
       errorCountContainer.textContent = `Errors ${index + 1}/${e.length}`
       previous.addEventListener('click', () => {
         if(index <= 0) {
-          console.log("Indice", index, "Reseteando...");
           index = e.length - 1;
         } else {
           index--;
         }
-        errorMessageArea.textContent = e[index].msg;
+        errorMessageArea.textContent = typeof e[index] === "object" ? e[index].msg : e[index];
         errorCountContainer.textContent = `Errors ${index + 1}/${e.length}`
-        console.log(index);
       });
 
       next.addEventListener('click', () => {
@@ -43,7 +42,7 @@
         } else {
           index++;
         }
-        errorMessageArea.textContent = e[index].msg;
+        errorMessageArea.textContent = typeof e[index] === "object" ? e[index].msg : e[index];
         errorCountContainer.textContent = `Errors ${index + 1}/${e.length}`
       });
     } else {
@@ -53,17 +52,17 @@
 
 
     errorMessageContainer.classList.toggle('slide');
-    errorMessageArea.textContent = e[index].msg;
+    errorMessageArea.textContent = typeof e[index] === "object" ? e[index].msg : e[index];
 
     timeoutId = setTimeout(() => {
       errorMessageContainer.classList.toggle('slide');
     }, 5000);
 
-    errorMessageContainer.addEventListener('mouseenter', () => {
+    errorMessageContainer.addEventListener("pointerenter", () => {
       clearTimeout(timeoutId);
     });
 
-    errorMessageContainer.addEventListener('mouseleave', () => {
+    errorMessageContainer.addEventListener("pointerleave", () => {
       timeoutId = setTimeout(() => {
         errorMessageContainer.classList.toggle('slide')
       }, 3000);

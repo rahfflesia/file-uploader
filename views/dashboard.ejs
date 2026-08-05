@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="/dashboard/dashboard.css">
   </head>
   <body>
-    <div class="error-message"></div>
     <dialog class="link-dialog">
       <div class="link-dialog-wrapper">
         <div class="flex-between-row">
@@ -22,6 +21,7 @@
       </div>
     </dialog>
     <%- include("./partials/createFolderModal") %>
+    <%- include("./partials/errorToast") %>
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>

@@ -1,19 +1,45 @@
 const express = require("express");
 const folder = express();
-const crpyto = require("crypto");
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const {
+  validateGetSharedFolder,
+  validateCreateFolder,
+  validateGetFolderFiles,
+  validateDeleteFolder,
+} = require("../validators/folderValidators");
+const { handleValidationErrors } = require("../middleware/errorMiddleware");
 
 const folderController = require("../controllers/folderController");
 
-folder.get("/share/:uuid", folderController.getSharedFolder);
+const getSharedFolderValidators = validateGetSharedFolder();
+folder.get(
+  "/share/:uuid",
+  handleValidationErrors("/auth/log-in", getSharedFolderValidators),
+  folderController.getSharedFolder,
+);
 
 folder.use(isAuthenticated);
 
-folder.post("/create", folderController.createFolder);
+const createFolderValidators = validateCreateFolder();
+folder.post(
+  "/create",
+  handleValidationErrors("/dashboard", createFolderValidators),
+  folderController.createFolder,
+);
 
-folder.get("/files/:folder_id", folderController.getAllFolderElements);
+const getFolderFilesValidators = validateGetFolderFiles();
+folder.get(
+  "/files/:folder_id",
+  handleValidationErrors("/folder/files", getFolderFilesValidators),
+  folderController.getAllFolderElements,
+);
 
-folder.get("/delete/:folder_id", folderController.deleteFolder);
+const getDeleteFolderValidators = validateDeleteFolder();
+folder.get(
+  "/delete/:folder_id",
+  handleValidationErrors("/folder/files", getDeleteFolderValidators),
+  folderController.deleteFolder,
+);
 
 folder.post("/share", folderController.shareFolder);
 

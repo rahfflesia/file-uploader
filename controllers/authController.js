@@ -13,25 +13,15 @@ async function getSignUp(req, res) {
 }
 
 async function postSignup(req, res) {
-  const password = req.body.password;
-  const confirmedPassword = req.body.confirmed_password;
-  const email = req.body.email;
-
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const signUpData = {
     first_name: req.body.first_name,
     last_name: req.body.last_name,
-    email: req.body.username,
+    email: req.body.email,
     password_hash: hashedPassword,
   };
 
-  const registeredUser = await User.createUser(signUpData);
-
-  if (!registeredUser) {
-    return res.render("./auth/signup", {
-      error: "An error ocurred during sign up, please try again",
-    });
-  }
+  await User.createUser(signUpData);
 
   res.status(201).redirect("/auth/log-in");
 }

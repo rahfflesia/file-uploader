@@ -287,6 +287,26 @@ class Folder {
     );
     return formattedFolders;
   }
+
+  static async findSharedFolder(uuid) {
+    const sharedFolder = await prisma.shared_folders.findUnique({
+      where: {
+        link_uuid: uuid,
+      },
+    });
+
+    return sharedFolder;
+  }
+
+  static async findSharedFile(uuid) {
+    const sharedFile = await prisma.shared_files.findUnique({
+      where: {
+        link_uuid: uuid,
+      },
+    });
+
+    return sharedFile;
+  }
 }
 
 module.exports = Folder;

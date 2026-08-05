@@ -68,7 +68,7 @@ function validateSignUp() {
 
 function validateLogIn() {
   return [
-    body("email")
+    body("username")
       .isString()
       .withMessage("The email must be a string")
       .trim()
@@ -78,7 +78,7 @@ function validateLogIn() {
       .withMessage("The email must be a valid one, example: mail@domain.com")
       .isLength({ min: 4, max: 320 })
       .withMessage("The email length must be between 4 and 320 characters"),
-    body("username")
+    body("password")
       .isString()
       .withMessage("The password must be a string")
       .trim()

@@ -7,6 +7,7 @@
     <title>FileUploader</title>
   </head>
   <body class="mh-100dvh flex-column">
+    <%- include("../partials/errorToast") %>
     <div class="login-form-wrapper flex-column">
       <div class="app-name-wrapper">
         <h1 class="app-name"></h1>
@@ -36,7 +37,7 @@
             name="password"
             class="default-input"
             required
-            minlength="8"
+            minlength="5"
           />
         </div>
         <button type="submit" class="regular-button">Log in</button>

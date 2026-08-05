@@ -118,17 +118,8 @@ async function shareFolder(req, res) {
 async function getSharedFolder(req, res) {
   const uuid = req.params.uuid;
 
-  const sharedFolder = await prisma.shared_folders.findUnique({
-    where: {
-      link_uuid: uuid,
-    },
-  });
-
-  const sharedFile = await prisma.shared_files.findUnique({
-    where: {
-      link_uuid: uuid,
-    },
-  });
+  const sharedFolder = await Folder.findSharedFile(uuid);
+  const sharedFile = await Folder.findSharedFile(uuid);
 
   const isFolder = sharedFolder !== null && sharedFile === null;
 
@@ -182,8 +173,6 @@ async function getSharedFolder(req, res) {
       owner: ownerFullName,
     });
   }
-
-  return res.status(404).send("<h1>Link not found</h1>");
 }
 
 async function getUpdateFolderView(req, res) {

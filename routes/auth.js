@@ -16,12 +16,16 @@ passport.use(
     try {
       const user = await User.findUserByEmail(username);
 
+      if (!user) {
+        return done(null, false, { message: "Incorrect user or password" });
+      }
+
       const isPasswordCorrect = await bcrypt.compare(
         password,
         user.password_hash,
       );
 
-      if (!user || !isPasswordCorrect) {
+      if (!isPasswordCorrect) {
         return done(null, false, { message: "Incorrect user or password" });
       }
 
@@ -51,19 +55,21 @@ auth.get("/log-in", authController.getLogin);
 
 auth.get("/sign-up", authController.getSignUp);
 
+const signUpValidators = validateSignUp();
 auth.post(
   "/sign-up",
-  [...validateSignUp(), handleValidationErrors("/auth/sign-up")],
+  handleValidationErrors("/auth/sign-up", signUpValidators),
   authController.postSignup,
 );
 
+const loginValidators = validateLogIn();
 auth.post(
   "/log-in",
-  [...validateLogIn(), handleValidationErrors("/auth/log-in")],
+  handleValidationErrors("/auth/log-in"),
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/log-in",
-    failureMessage: true,
+    failureFlash: true,
   }),
 );
 
