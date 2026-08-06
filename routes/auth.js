@@ -58,14 +58,14 @@ auth.get("/sign-up", authController.getSignUp);
 const signUpValidators = validateSignUp();
 auth.post(
   "/sign-up",
-  handleValidationErrors("/auth/sign-up", signUpValidators),
+  handleValidationErrors(() => "/auth/sign-up", signUpValidators),
   authController.postSignup,
 );
 
 const loginValidators = validateLogIn();
 auth.post(
   "/log-in",
-  handleValidationErrors("/auth/log-in"),
+  handleValidationErrors(() => "/auth/log-in"),
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/log-in",
