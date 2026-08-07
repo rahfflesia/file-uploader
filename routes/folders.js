@@ -6,6 +6,9 @@ const {
   validateCreateFolder,
   validateGetFolderFiles,
   validateDeleteFolder,
+  validateShareFolder,
+  validateUpdateFolder,
+  validateUpdateFolderView,
 } = require("../validators/folderValidators");
 
 const folderController = require("../controllers/folderController");
@@ -44,8 +47,10 @@ folder.get(
 const getShareFolderValidators = validateGetSharedFolder();
 folder.post("/share", [...getShareFolderValidators] ,folderController.shareFolder);
 
-folder.post("/update", folderController.updateFolderName);
+const getUpdateFolderValidators = validateUpdateFolder();
+folder.post("/update", [...getUpdateFolderValidators] ,folderController.updateFolderName);
 
-folder.get("/update/:folder_id", folderController.getUpdateFolderView);
+const getUpdateFolderViewValidators = validateUpdateFolderView();
+folder.get("/update/:folder_id", [...getUpdateFolderViewValidators] ,folderController.getUpdateFolderView);
 
 module.exports = folder;

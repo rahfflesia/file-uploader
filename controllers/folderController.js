@@ -3,163 +3,188 @@ const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 const { validationResult } = require("express-validator");
 
-async function createFolder(req, res) {
-  const result = validationResult(req);
+async function createFolder(req, res, next) {
+  try {
+    const result = validationResult(req);
+    const parentFolderId = req.body.parent_folder_id
+      ? parseInt(req.body.parent_folder_id)
+      : null;
 
-  const parentFolderId = req.body.parent_folder_id
-    ? parseInt(req.body.parent_folder_id)
-    : null;
+    if(!result.isEmpty()) {
+      req.flash("error", result.array());
 
-  if(!result.isEmpty()) {
-    req.flash("error", result.array());
-
-    if(!parentFolderId) {
-      return res.status(404).redirect("/dashboard");
+      if(!parentFolderId) {
+        return res.status(404).redirect("/dashboard");
+      }
+      else {
+        return res.status(404).redirect(`/folder/files/${parentFolderId}`);
+      }
     }
-    else {
-      return res.status(404).redirect(`/folder/files/${parentFolderId}`);
+
+    const folderData = {
+      folder_name: req.body.folder_name,
+      user_id: req.session.passport.user,
+      parent_folder_id: parentFolderId,
+    };
+
+    await Folder.createFolder(folderData);
+
+    if (parentFolderId === null) {
+      return res.status(201).redirect("/dashboard");
     }
+
+    res.status(201).redirect(`/folder/files/${req.body.parent_folder_id}`);
   }
-
-
-  const folderData = {
-    folder_name: req.body.folder_name,
-    user_id: req.session.passport.user,
-    parent_folder_id: parentFolderId,
-  };
-
-  await Folder.createFolder(folderData);
-
-  if (parentFolderId === null) {
-    return res.status(201).redirect("/dashboard");
+  catch(err) {
+    next(err);
   }
-
-  res.status(201).redirect(`/folder/files/${req.body.parent_folder_id}`);
 }
 
-async function getAllFolderElements(req, res) {
-  const result = validationResult(req);
+async function getAllFolderElements(req, res, next) {
+  try {
+    const result = validationResult(req);
 
-  if(!result.isEmpty()) {
-    req.flash("error", result.array());
-    return res.status(403).redirect(req.originalUrl);
-  }
-
-  const userId = req.session.passport.user;
-  const folderId = parseInt(req.params.folder_id);
-  const folderData = await Folder.getFolder(folderId);
-
-  if(!folderData) {
-    req.flash("error", "No folder found");
-    return res.status(404).redirect("/dashboard");
-  }
-
-  if (folderData.user_id !== userId) {
-    return res.status(401).send("<h1>No tienes acceso a este recurso</h1>");
-  }
-
-  const folderElements = await Folder.getAllElements(folderId);
-
-  async function getPath() {
-    let currentFolder = folder;
-    let foldersArray = [currentFolder];
-
-    while (currentFolder.parent_folder_id !== null) {
-      currentFolder = await Folder.getFolder(currentFolder.parent_folder_id);
-      foldersArray.push(currentFolder);
+    if(!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect(req.originalUrl);
     }
 
-    return foldersArray;
+    const userId = req.session.passport.user;
+    const folderId = parseInt(req.params.folder_id);
+    const folderData = await Folder.getFolder(folderId);
+
+    if(!folderData) {
+      req.flash("error", "No folder found");
+      return res.redirect("/dashboard");
+    }
+
+    if (folderData.user_id !== userId) {
+      req.flash("error", "You don't have access to this resource");
+      return res.redirect("/dashboard");
+    }
+
+    const folderElements = await Folder.getAllElements(folderId);
+
+    async function getPath() {
+      let currentFolder = folderData;
+      let foldersArray = [currentFolder];
+
+      while (currentFolder.parent_folder_id !== null) {
+        currentFolder = await Folder.getFolder(currentFolder.parent_folder_id);
+        foldersArray.push(currentFolder);
+      }
+
+      return foldersArray;
+    }
+
+    const pathArray = (await getPath()).reverse();
+
+    res.status(200).render("./folders/folderFiles", {
+      elements: folderElements,
+      folder: folderData,
+      pathArray: pathArray,
+      areDestructiveActionsEnabled: true,
+    });
   }
 
-  const pathArray = (await getPath()).reverse();
-
-  res.status(200).render("./folders/folderFiles", {
-    elements: folderElements,
-    folder: folder,
-    pathArray: pathArray,
-    areDestructiveActionsEnabled: true,
-  });
+  catch(err) {
+    next(err);
+  }
 }
 
 async function deleteFolder(req, res, next) {
-  const result = validationResult(req);
+  try {
+    const result = validationResult(req);
 
-  if(!result.isEmpty()) {
-    req.flash("Error", result.array());
-    return res.status(403).redirect("/dashboard");
+    if(!result.isEmpty()) {
+      req.flash("Error", result.array());
+      return res.redirect(req.originalUrl);
+    }
+
+    const userId = req.session.passport.user;
+    const folderId = req.params.folder_id;
+    const folder = await Folder.getFolder(folderId);
+
+    if(!folder) {
+      req.flash("Error", "No folder found");
+      return res.redirect("/dashboard");
+    }
+
+    if (folder.user_id !== userId) {
+      req.flash("error", "You don't have access to this resource");
+      return res
+        .redirect("/dashboard")
+    }
+
+    const deletedFolder = await Folder.deleteFolder(folderId);
+    const parentFolderId = deletedFolder.parent_folder_id;
+
+    if(parentFolderId === null) {
+      return res.redirect("/dashboard");
+    }
+
+    res.redirect(`/folder/files/${parentFolderId}`);
   }
-
-  const userId = req.session.passport.user;
-  const folderId = req.params.folder_id;
-  const folder = await Folder.getFolder(folderId);
-
-  if(!folder) {
-    req.flash("Error", "No folder found");
-    return res.status(404).redirect("/dashboard");
+  catch(err) {
+    next(err);
   }
-
-  if (folder.user_id !== userId) {
-    return res
-      .status(401)
-      .send("<h1>No tienes permiso para borrar esta carpeta</h1>");
-  }
-
-  const deletedFolder = await Folder.deleteFolder(folderId);
-
-  if(!deletedFolder) {
-    const error = new Error("The folder was not deleted");
-    return next(error);
-  }
-
-  res.status(200).redirect("/dashboard");
 }
 
 // Aquí estoy mezclando lógica del modelo con la del controlador
 // Luego le hago el refactor
-async function shareFolder(req, res) {
-  const result = validationResult(req);
+async function shareFolder(req, res, next) {
+  try {
+    const result = validationResult(req);
 
-  const folderHistory = await prisma.shared_folders.findMany({
-    where: {
+    if(!result.isEmpty()) {
+      req.error("error", result.array());
+      return res.redirect(req.originalUrl);
+    }
+
+    const folderHistory = await prisma.shared_folders.findMany({
+      where: {
+        folder_id: parseInt(req.body.folder_id),
+      },
+    });
+
+    if (isSharedFolder(folderHistory)) {
+      req.error("error", "Folder has already been shared");
+      return res.status(200).redirect("/dashboard");
+    }
+
+    const expirationDays = parseInt(req.body.expiration_days);
+    const milisecondsPerDay = 24 * 60 * 60 * 1000;
+    const expirationTimeMiliseconds =
+      Date.now() + expirationDays * milisecondsPerDay;
+    const expirationDate = new Date(expirationTimeMiliseconds);
+
+    const data = {
+      user_id: req.session.passport.user,
       folder_id: parseInt(req.body.folder_id),
-    },
-  });
-
-  if (isSharedFolder(folderHistory)) {
-    return res.status(200).redirect("/dashboard");
-  }
-
-  const expirationDays = parseInt(req.body.expiration_days);
-  const milisecondsPerDay = 24 * 60 * 60 * 1000;
-  const expirationTimeMiliseconds =
-    Date.now() + expirationDays * milisecondsPerDay;
-  const expirationDate = new Date(expirationTimeMiliseconds);
-
-  const data = {
-    user_id: req.session.passport.user,
-    folder_id: parseInt(req.body.folder_id),
-    expires_at: expirationDate,
-  };
-
-  const sharedFolder = await prisma.shared_folders.create({
-    data: data,
-    include: {
-      folders: {
-        select: {
-          parent_folder_id: true,
+      expires_at: expirationDate,
+    };
+    
+    const sharedFolder = await prisma.shared_folders.create({
+      data: data,
+      include: {
+        folders: {
+          select: {
+            parent_folder_id: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (sharedFolder.folders.parent_folder_id === null) {
-    return res.status(201).redirect("/dashboard");
+    if (sharedFolder.folders.parent_folder_id === null) {
+      return res.redirect("/dashboard");
+    }
+
+    res
+      .redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
   }
-
-  res
-    .status(201)
-    .redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
+  catch(err) {
+    next(err);
+  }
 }
 
 async function getSharedFolder(req, res) {
@@ -176,7 +201,8 @@ async function getSharedFolder(req, res) {
   const sharedFile = await Folder.findSharedFile(uuid);
 
   if(!sharedFolder && !sharedFile) {
-    return res.status(404).redirect("/auth/log-in");
+    req.session("error", "No resource was found")
+    return res.status(404).redirect("/dashboard");
   }
 
   const isFolder = sharedFolder !== null && sharedFile === null;

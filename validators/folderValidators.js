@@ -85,10 +85,27 @@ function validateShareFolder() {
   ];
 }
 
+function validateUpdateFolder() {
+  return [
+    body("folder_name").isString().withMessage("The folder name must be a string")
+    .bail().trim().notEmpty().withMessage("The folder name cannot be empty").
+    bail().isLength({min: 1, max: 128}).withMessage("The folder name must be between 1 and 128 characters"),
+    body("folder_id").isInt({min: 1}).withMessage("Invalid id").bail().trim().notEmpty().withMessage("The id cannot be empty")
+  ]
+}
+
+function validateUpdateFolderView() {
+  return [
+    param("folder_id").isInt({min: 1}).withMessage("Invalid id").bail().trim().notEmpty().withMessage("The id cannot be empty")
+  ];
+}
+
 module.exports = {
   validateGetSharedFolder,
   validateCreateFolder,
   validateGetFolderFiles,
   validateDeleteFolder,
-  validateShareFolder
+  validateShareFolder,
+  validateUpdateFolder,
+  validateUpdateFolderView
 };
