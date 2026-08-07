@@ -63,11 +63,13 @@ class Folder {
 
     await deleteFilesRecursively(id);
 
-    await prisma.folders.delete({
+    const deletedFolder = await prisma.folders.delete({
       where: {
         folder_id: id,
       },
     });
+
+    return deletedFolder;
   }
 
   static async getFolder(folderId) {

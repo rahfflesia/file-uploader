@@ -13,16 +13,6 @@ function validateGetSharedFolder() {
       .bail()
       .isUUID()
       .withMessage("The link identifier is not valid")
-      .bail()
-      .custom(async (uuid) => {
-        const resourceUUID = uuid;
-        const sharedFolder = await Folder.findSharedFolder(resourceUUID);
-        const sharedFile = await Folder.findSharedFile(resourceUUID);
-
-        if (!sharedFolder && !sharedFile) {
-          throw new Error("No resource is associated to that link");
-        }
-      }),
   ];
 }
 
@@ -52,15 +42,6 @@ function validateCreateFolder() {
   ];
 }
 
-async function isExistingFolder(id) {
-  const folderId = parseInt(id);
-  const folder = await Folder.getFolder(folderId);
-
-  if (!folder) {
-    throw new Error("No folder was found");
-  }
-}
-
 function validateGetFolderFiles() {
   return [
     param("folder_id")
@@ -70,8 +51,6 @@ function validateGetFolderFiles() {
       .trim()
       .notEmpty()
       .withMessage("The id cannot be empty")
-      .bail()
-      .custom(isExistingFolder),
   ];
 }
 
@@ -84,8 +63,6 @@ function validateDeleteFolder() {
       .trim()
       .notEmpty()
       .withMessage("The id cannot be empty")
-      .bail()
-      .custom(isExistingFolder),
   ];
 }
 
@@ -105,8 +82,6 @@ function validateShareFolder() {
       .trim()
       .notEmpty()
       .withMessage("The id cannot be empty")
-      .bail()
-      .custom(isExistingFolder),
   ];
 }
 
@@ -115,4 +90,5 @@ module.exports = {
   validateCreateFolder,
   validateGetFolderFiles,
   validateDeleteFolder,
+  validateShareFolder
 };

@@ -1,11 +1,27 @@
 const prisma = require("../lib/prisma");
 const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
+const { validationResult } = require("express-validator");
 
 async function createFolder(req, res) {
+  const result = validationResult(req);
+
   const parentFolderId = req.body.parent_folder_id
     ? parseInt(req.body.parent_folder_id)
     : null;
+
+  if(!result.isEmpty()) {
+    req.flash("error", result.array());
+
+    if(!parentFolderId) {
+      return res.status(404).redirect("/dashboard");
+    }
+    else {
+      return res.status(404).redirect(`/folder/files/${parentFolderId}`);
+    }
+  }
+
+
   const folderData = {
     folder_name: req.body.folder_name,
     user_id: req.session.passport.user,
@@ -15,23 +31,34 @@ async function createFolder(req, res) {
   await Folder.createFolder(folderData);
 
   if (parentFolderId === null) {
-    return res.redirect("/dashboard");
+    return res.status(201).redirect("/dashboard");
   }
 
-  res.redirect(`/folder/files/${req.body.parent_folder_id}`);
+  res.status(201).redirect(`/folder/files/${req.body.parent_folder_id}`);
 }
 
 async function getAllFolderElements(req, res) {
+  const result = validationResult(req);
+
+  if(!result.isEmpty()) {
+    req.flash("error", result.array());
+    return res.status(403).redirect(req.originalUrl);
+  }
+
   const userId = req.session.passport.user;
   const folderId = parseInt(req.params.folder_id);
   const folderData = await Folder.getFolder(folderId);
+
+  if(!folderData) {
+    req.flash("error", "No folder found");
+    return res.status(404).redirect("/dashboard");
+  }
 
   if (folderData.user_id !== userId) {
     return res.status(401).send("<h1>No tienes acceso a este recurso</h1>");
   }
 
   const folderElements = await Folder.getAllElements(folderId);
-  const folder = await Folder.getFolder(folderId);
 
   async function getPath() {
     let currentFolder = folder;
@@ -55,10 +82,22 @@ async function getAllFolderElements(req, res) {
   });
 }
 
-async function deleteFolder(req, res) {
+async function deleteFolder(req, res, next) {
+  const result = validationResult(req);
+
+  if(!result.isEmpty()) {
+    req.flash("Error", result.array());
+    return res.status(403).redirect("/dashboard");
+  }
+
   const userId = req.session.passport.user;
   const folderId = req.params.folder_id;
   const folder = await Folder.getFolder(folderId);
+
+  if(!folder) {
+    req.flash("Error", "No folder found");
+    return res.status(404).redirect("/dashboard");
+  }
 
   if (folder.user_id !== userId) {
     return res
@@ -66,13 +105,21 @@ async function deleteFolder(req, res) {
       .send("<h1>No tienes permiso para borrar esta carpeta</h1>");
   }
 
-  await Folder.deleteFolder(folderId);
+  const deletedFolder = await Folder.deleteFolder(folderId);
+
+  if(!deletedFolder) {
+    const error = new Error("The folder was not deleted");
+    return next(error);
+  }
+
   res.status(200).redirect("/dashboard");
 }
 
 // Aquí estoy mezclando lógica del modelo con la del controlador
 // Luego le hago el refactor
 async function shareFolder(req, res) {
+  const result = validationResult(req);
+
   const folderHistory = await prisma.shared_folders.findMany({
     where: {
       folder_id: parseInt(req.body.folder_id),
@@ -116,10 +163,21 @@ async function shareFolder(req, res) {
 }
 
 async function getSharedFolder(req, res) {
+  const result = validationResult(req);
+
+  if(!result.isEmpty()) {
+    req.session("error", result.array());
+    return res.status(404).redirect("/dashboard");
+  }
+
   const uuid = req.params.uuid;
 
   const sharedFolder = await Folder.findSharedFile(uuid);
   const sharedFile = await Folder.findSharedFile(uuid);
+
+  if(!sharedFolder && !sharedFile) {
+    return res.status(404).redirect("/auth/log-in");
+  }
 
   const isFolder = sharedFolder !== null && sharedFile === null;
 
@@ -136,7 +194,6 @@ async function getSharedFolder(req, res) {
   const ownerFullName = owner.first_name + " " + owner.last_name;
 
   if (isFolder) {
-    console.log("Es folder");
     if (Date.now() > sharedFolder.expires_at.getTime()) {
       return res.status(410).render("expiredLink");
     }
@@ -150,7 +207,6 @@ async function getSharedFolder(req, res) {
       owner: ownerFullName,
     });
   } else if (!isFolder) {
-    console.log("No es folder");
     if (Date.now() > sharedFile.expires_at.getTime()) {
       return res.status(410).render("expiredLink");
     }
