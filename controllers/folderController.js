@@ -10,13 +10,12 @@ async function createFolder(req, res, next) {
       ? parseInt(req.body.parent_folder_id)
       : null;
 
-    if(!result.isEmpty()) {
+    if (!result.isEmpty()) {
       req.flash("error", result.array());
 
-      if(!parentFolderId) {
+      if (!parentFolderId) {
         return res.status(404).redirect("/dashboard");
-      }
-      else {
+      } else {
         return res.status(404).redirect(`/folder/files/${parentFolderId}`);
       }
     }
@@ -34,8 +33,7 @@ async function createFolder(req, res, next) {
     }
 
     res.status(201).redirect(`/folder/files/${req.body.parent_folder_id}`);
-  }
-  catch(err) {
+  } catch (err) {
     next(err);
   }
 }
@@ -44,16 +42,16 @@ async function getAllFolderElements(req, res, next) {
   try {
     const result = validationResult(req);
 
-    if(!result.isEmpty()) {
+    if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect(req.originalUrl);
+      return res.redirect("/dashboard");
     }
 
     const userId = req.session.passport.user;
     const folderId = parseInt(req.params.folder_id);
     const folderData = await Folder.getFolder(folderId);
 
-    if(!folderData) {
+    if (!folderData) {
       req.flash("error", "No folder found");
       return res.redirect("/dashboard");
     }
@@ -85,9 +83,7 @@ async function getAllFolderElements(req, res, next) {
       pathArray: pathArray,
       areDestructiveActionsEnabled: true,
     });
-  }
-
-  catch(err) {
+  } catch (err) {
     next(err);
   }
 }
@@ -96,36 +92,34 @@ async function deleteFolder(req, res, next) {
   try {
     const result = validationResult(req);
 
-    if(!result.isEmpty()) {
-      req.flash("Error", result.array());
-      return res.redirect(req.originalUrl);
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
     }
 
     const userId = req.session.passport.user;
     const folderId = req.params.folder_id;
     const folder = await Folder.getFolder(folderId);
 
-    if(!folder) {
-      req.flash("Error", "No folder found");
+    if (!folder) {
+      req.flash("error", "No folder found");
       return res.redirect("/dashboard");
     }
 
     if (folder.user_id !== userId) {
       req.flash("error", "You don't have access to this resource");
-      return res
-        .redirect("/dashboard")
+      return res.redirect("/dashboard");
     }
 
     const deletedFolder = await Folder.deleteFolder(folderId);
     const parentFolderId = deletedFolder.parent_folder_id;
 
-    if(parentFolderId === null) {
+    if (parentFolderId === null) {
       return res.redirect("/dashboard");
     }
 
     res.redirect(`/folder/files/${parentFolderId}`);
-  }
-  catch(err) {
+  } catch (err) {
     next(err);
   }
 }
@@ -134,22 +128,45 @@ async function deleteFolder(req, res, next) {
 // Luego le hago el refactor
 async function shareFolder(req, res, next) {
   try {
+    const folderId = parseInt(req.body.folder_id);
     const result = validationResult(req);
 
-    if(!result.isEmpty()) {
-      req.error("error", result.array());
-      return res.redirect(req.originalUrl);
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
+    }
+
+    const folder = await Folder.getFolder(folderId);
+
+    if (!folder) {
+      req.flash(
+        "error",
+        "You are trying to share a folder that does not exist",
+      );
+      return res.redirect("/dashboard");
     }
 
     const folderHistory = await prisma.shared_folders.findMany({
       where: {
         folder_id: parseInt(req.body.folder_id),
       },
+      include: {
+        folders: {
+          select: {
+            parent_folder_id: true,
+          },
+        },
+      },
     });
 
     if (isSharedFolder(folderHistory)) {
-      req.error("error", "Folder has already been shared");
-      return res.status(200).redirect("/dashboard");
+      req.flash("error", "Folder has already been shared");
+
+      if (folder.parent_folder_id === null) {
+        return res.redirect("/dashboard");
+      }
+
+      return res.redirect(`/folder/files/${folder.parent_folder_id}`);
     }
 
     const expirationDays = parseInt(req.body.expiration_days);
@@ -163,7 +180,7 @@ async function shareFolder(req, res, next) {
       folder_id: parseInt(req.body.folder_id),
       expires_at: expirationDate,
     };
-    
+
     const sharedFolder = await prisma.shared_folders.create({
       data: data,
       include: {
@@ -179,96 +196,144 @@ async function shareFolder(req, res, next) {
       return res.redirect("/dashboard");
     }
 
-    res
-      .redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
-  }
-  catch(err) {
+    res.redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
+  } catch (err) {
     next(err);
   }
 }
 
-async function getSharedFolder(req, res) {
-  const result = validationResult(req);
+async function getSharedFolder(req, res, next) {
+  try {
+    const result = validationResult(req);
 
-  if(!result.isEmpty()) {
-    req.session("error", result.array());
-    return res.status(404).redirect("/dashboard");
-  }
-
-  const uuid = req.params.uuid;
-
-  const sharedFolder = await Folder.findSharedFile(uuid);
-  const sharedFile = await Folder.findSharedFile(uuid);
-
-  if(!sharedFolder && !sharedFile) {
-    req.session("error", "No resource was found")
-    return res.status(404).redirect("/dashboard");
-  }
-
-  const isFolder = sharedFolder !== null && sharedFile === null;
-
-  const owner = await prisma.users.findUnique({
-    where: {
-      user_id: isFolder ? sharedFolder.user_id : sharedFile.user_id,
-    },
-    select: {
-      first_name: true,
-      last_name: true,
-    },
-  });
-
-  const ownerFullName = owner.first_name + " " + owner.last_name;
-
-  if (isFolder) {
-    if (Date.now() > sharedFolder.expires_at.getTime()) {
-      return res.status(410).render("expiredLink");
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
     }
 
-    const elements = await Folder.getAllElements(sharedFolder.folder_id);
+    const uuid = req.params.uuid;
 
-    return res.status(200).render("./folders/sharedFolder", {
-      elements: elements,
-      type: "folder",
-      areDestructiveActionsEnabled: false,
-      owner: ownerFullName,
-    });
-  } else if (!isFolder) {
-    if (Date.now() > sharedFile.expires_at.getTime()) {
-      return res.status(410).render("expiredLink");
+    const sharedFolder = await Folder.findSharedFolder(uuid);
+    const sharedFile = await Folder.findSharedFile(uuid);
+
+    if (!sharedFolder && !sharedFile) {
+      req.flash("error", "No resource was found");
+      return res.redirect("/dashboard");
     }
 
-    const file = await prisma.files.findUnique({
+    const isFolder = sharedFolder !== null && sharedFile === null;
+
+    const owner = await prisma.users.findUnique({
       where: {
-        file_id: sharedFile.file_id,
+        user_id: isFolder ? sharedFolder.user_id : sharedFile.user_id,
+      },
+      select: {
+        first_name: true,
+        last_name: true,
       },
     });
 
-    const formattedFile = {
-      ...file,
-      size: convertBytes(file.bytes),
-    };
+    const ownerFullName = owner.first_name + " " + owner.last_name;
 
-    return res.status(200).render("./folders/sharedFolder", {
-      elements: formattedFile,
-      type: "file",
-      areDestructiveActionsEnabled: false,
-      owner: ownerFullName,
-    });
+    if (isFolder) {
+      if (Date.now() > sharedFolder.expires_at.getTime()) {
+        return res.status(410).render("expiredLink");
+      }
+
+      const elements = await Folder.getAllElements(sharedFolder.folder_id);
+
+      return res.status(200).render("./folders/sharedFolder", {
+        elements: elements,
+        type: "folder",
+        areDestructiveActionsEnabled: false,
+        owner: ownerFullName,
+      });
+    } else if (!isFolder) {
+      if (Date.now() > sharedFile.expires_at.getTime()) {
+        return res.status(410).render("expiredLink");
+      }
+
+      const file = await prisma.files.findUnique({
+        where: {
+          file_id: sharedFile.file_id,
+        },
+      });
+
+      const formattedFile = {
+        ...file,
+        size: convertBytes(file.bytes),
+      };
+
+      return res.status(200).render("./folders/sharedFolder", {
+        elements: formattedFile,
+        type: "file",
+        areDestructiveActionsEnabled: false,
+        owner: ownerFullName,
+      });
+    }
+  } catch (err) {
+    next(err);
   }
 }
 
-async function getUpdateFolderView(req, res) {
-  const folder = await Folder.getFolder(parseInt(req.params.folder_id));
-  const data = {
-    folder_id: folder.folder_id,
-    folder_name: folder.folder_name,
-  };
-  res.status(200).render("./folders/updateFolderName", { folder: data });
+async function getUpdateFolderView(req, res, next) {
+  try {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
+    }
+
+    const folderId = parseInt(req.params.folder_id);
+    const folder = await Folder.getFolder(folderId);
+
+    if (!folder) {
+      req.flash("error", "No folder was found");
+      return res.redirect("/dashboard");
+    }
+
+    const data = {
+      folder_id: folder.folder_id,
+      folder_name: folder.folder_name,
+    };
+
+    res.status(200).render("./folders/updateFolderName", { folder: data });
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function updateFolderName(req, res) {
-  await Folder.updateFolderName(req.body);
-  res.status(200).redirect("/dashboard");
+async function updateFolderName(req, res, next) {
+  try {
+    const folderId = Number(req.body.folder_id);
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      req.flash("error", errors);
+
+      const hasFolderIdError = errors.some(
+        (error) => error.path === "folder_id",
+      );
+
+      if (!hasFolderIdError && Number.isInteger(folderId)) {
+        return res.redirect(`/folder/update/${folderId}`);
+      }
+
+      return res.redirect("/dashboard");
+    }
+
+    const updatedFolder = await Folder.updateFolderName(req.body);
+
+    if (updatedFolder.parent_folder_id === null) {
+      return res.redirect("/dashboard");
+    }
+
+    res.redirect(`/folder/files/${updatedFolder.parent_folder_id}`);
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = {

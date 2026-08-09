@@ -82,7 +82,7 @@ class Folder {
   }
 
   static async updateFolderName(folderData) {
-    await prisma.folders.update({
+    const folder = await prisma.folders.update({
       data: {
         folder_name: folderData.folder_name,
       },
@@ -90,6 +90,8 @@ class Folder {
         folder_id: parseInt(folderData.folder_id),
       },
     });
+
+    return folder;
   }
 
   static async getAllFolderChilds(folderId) {

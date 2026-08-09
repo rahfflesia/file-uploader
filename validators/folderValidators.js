@@ -12,7 +12,7 @@ function validateGetSharedFolder() {
       .withMessage("The link identifier cannot be empty")
       .bail()
       .isUUID()
-      .withMessage("The link identifier is not valid")
+      .withMessage("The link identifier is not valid"),
   ];
 }
 
@@ -50,7 +50,7 @@ function validateGetFolderFiles() {
       .bail()
       .trim()
       .notEmpty()
-      .withMessage("The id cannot be empty")
+      .withMessage("The id cannot be empty"),
   ];
 }
 
@@ -62,7 +62,7 @@ function validateDeleteFolder() {
       .bail()
       .trim()
       .notEmpty()
-      .withMessage("The id cannot be empty")
+      .withMessage("The id cannot be empty"),
   ];
 }
 
@@ -81,22 +81,35 @@ function validateShareFolder() {
       .bail()
       .trim()
       .notEmpty()
-      .withMessage("The id cannot be empty")
+      .withMessage("The id cannot be empty"),
   ];
 }
 
 function validateUpdateFolder() {
   return [
-    body("folder_name").isString().withMessage("The folder name must be a string")
-    .bail().trim().notEmpty().withMessage("The folder name cannot be empty").
-    bail().isLength({min: 1, max: 128}).withMessage("The folder name must be between 1 and 128 characters"),
-    body("folder_id").isInt({min: 1}).withMessage("Invalid id").bail().trim().notEmpty().withMessage("The id cannot be empty")
-  ]
+    body("folder_id").trim().isInt({ min: 1 }).withMessage("Invalid id").bail(),
+    body("folder_name")
+      .isString()
+      .withMessage("The folder name must be a string")
+      .bail()
+      .trim()
+      .notEmpty()
+      .withMessage("The folder name cannot be empty")
+      .bail()
+      .isLength({ min: 1, max: 128 })
+      .withMessage("The folder name must be between 1 and 128 characters"),
+  ];
 }
 
 function validateUpdateFolderView() {
   return [
-    param("folder_id").isInt({min: 1}).withMessage("Invalid id").bail().trim().notEmpty().withMessage("The id cannot be empty")
+    param("folder_id")
+      .isInt({ min: 1 })
+      .withMessage("Invalid id")
+      .bail()
+      .trim()
+      .notEmpty()
+      .withMessage("The id cannot be empty"),
   ];
 }
 
@@ -107,5 +120,5 @@ module.exports = {
   validateDeleteFolder,
   validateShareFolder,
   validateUpdateFolder,
-  validateUpdateFolderView
+  validateUpdateFolderView,
 };

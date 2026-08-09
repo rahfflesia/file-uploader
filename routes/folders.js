@@ -26,14 +26,15 @@ folder.use(isAuthenticated);
 
 const createFolderValidators = validateCreateFolder();
 folder.post(
-  "/create", [...createFolderValidators],
+  "/create",
+  [...createFolderValidators],
   folderController.createFolder,
 );
 
 const getFolderFilesValidators = validateGetFolderFiles();
 folder.get(
   "/files/:folder_id",
-  [...getSharedFolderValidators],
+  [...getFolderFilesValidators],
   folderController.getAllFolderElements,
 );
 
@@ -45,12 +46,24 @@ folder.get(
 );
 
 const getShareFolderValidators = validateGetSharedFolder();
-folder.post("/share", [...getShareFolderValidators] ,folderController.shareFolder);
+folder.post(
+  "/share",
+  [...getShareFolderValidators],
+  folderController.shareFolder,
+);
 
 const getUpdateFolderValidators = validateUpdateFolder();
-folder.post("/update", [...getUpdateFolderValidators] ,folderController.updateFolderName);
+folder.post(
+  "/update",
+  [...getUpdateFolderValidators],
+  folderController.updateFolderName,
+);
 
 const getUpdateFolderViewValidators = validateUpdateFolderView();
-folder.get("/update/:folder_id", [...getUpdateFolderViewValidators] ,folderController.getUpdateFolderView);
+folder.get(
+  "/update/:folder_id",
+  [...getUpdateFolderViewValidators],
+  folderController.getUpdateFolderView,
+);
 
 module.exports = folder;
