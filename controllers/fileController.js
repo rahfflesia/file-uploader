@@ -9,28 +9,19 @@ async function deleteFile(req, res, next) {
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
-      const errors = result.array();
-      const hasIdError = errors.some((error) => error.path === "file_id");
-
-      req.flash("error", errors);
-
-      if (hasIdError) {
-        return res.redirect("/dashboard");
-      }
-
-      const fileId = Number(req.body.file_id);
-      const file = await File.getFileDetails(fileId);
-
-      if (!file) {
-        req.flash("error", "No file was found");
-        return res.redirect("/dashboard");
-      }
-
-      return res.redirect(file.folder_id ? `/folder/files/${file.folder_id}` : "/dashboard");
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
     }
 
     const data = matchedData(req);
     const fileId = data.file_id;
+
+    const file = await File.getFileDetails(fileId);
+
+    if (!file) {
+      req.flash("error", "No file was found");
+      return res.redirect("/dashboard");
+    }
 
     const deletedFile = await File.deleteFile(fileId);
     await cloudinary.uploader.destroy(deletedFile.cloudinary_public_id, {
