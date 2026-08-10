@@ -7,7 +7,7 @@ const cloudinary = require("cloudinary").v2;
 const Folder = require("../models/Folder");
 const { convertBytes } = require("../helpers/helpers");
 const { isAuthenticated } = require("../middleware/authMiddleware");
-const { validateDeleteFile } = require("../validators/fileValidators");
+const { validateId, validateShareFile, validateUpdateFile } = require("../validators/fileValidators");
 
 const prisma = require("../lib/prisma");
 
@@ -80,15 +80,20 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
   res.status(201).redirect(`/folder/files/${folderId}`);
 });
 
-const deleteFileValidators = validateDeleteFile();
-file.get("/delete/:file_id", [...deleteFileValidators] ,fileController.deleteFile);
+const idValidators = validateId();
 
-file.get("/details/:file_id", fileController.getFileDetails);
+file.get("/delete/:file_id", [...idValidators] ,fileController.deleteFile);
 
-file.get("/update/:file_id", fileController.getUpdateFileNameView);
+file.get("/details/:file_id", [...idValidators] ,fileController.getFileDetails);
 
-file.post("/update", fileController.updateFileName);
+file.get("/update/:file_id", [...idValidators] ,fileController.getUpdateFileNameView);
 
-file.post("/share", fileController.shareFile);
+const updateFileValidators = validateUpdateFile();
+
+file.post("/update", [...updateFileValidators] ,fileController.updateFileName);
+
+const shareFileValidators = validateShareFile();
+
+file.post("/share", [...shareFileValidators] ,fileController.shareFile);
 
 module.exports = file;

@@ -53,6 +53,12 @@ async function getFileDetails(req, res, next) {
 
     const fileId = data.file_id;
     const file = await File.getFileDetails(fileId);
+
+    if (!file) {
+      req.flash("error", "No file was found");
+      return res.redirect("/dashboard");
+    }
+
     const formatedFile = {
       ...file,
       size: convertBytes(file.bytes),
@@ -64,60 +70,147 @@ async function getFileDetails(req, res, next) {
   }
 }
 
-async function getUpdateFileNameView(req, res) {
-  const fileId = req.params.file_id;
-  const file = await File.getFileDetails(fileId);
-  res.status(200).render("./files/updateFileName", { file: file });
-}
+async function getUpdateFileNameView(req, res, next) {
+  try {
+    const result = validationResult(req);
 
-async function updateFileName(req, res) {
-  const updatedFile = await File.updateFileName(req.body);
-  if (updatedFile.folder_id === null) {
-    return res.status(200).redirect("/dashboard");
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
+    }
+
+    const data = matchedData(req);
+    const fileId = data.file_id;
+    const file = await File.getFileDetails(fileId);
+
+    if (!file) {
+      req.flash("error", "No folder was found");
+      return res.redirect("/dashboard");
+    }
+
+    res.status(200).render("./files/updateFileName", { file: file });
+  } catch (err) {
+    next(err);
   }
-  res.status(200).redirect(`/folder/files/${updatedFile.folder_id}`);
 }
 
-async function shareFile(req, res) {
-  const fileId = parseInt(req.body.file_id);
-  const fileHistory = await prisma.shared_files.findMany({
-    where: {
+async function updateFileName(req, res, next) {
+  try {
+    const result = validationResult(req);
+    const dashboardRoute = "/dashboard";
+
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      const hasErrorId = errors.some((error) => error.path === "file_id");
+
+      if (hasErrorId) {
+        req.flash("error", errors);
+        return res.redirect(dashboardRoute);
+      }
+
+      const fileId = Number(req.body.file_id);
+      const file = await File.getFileDetails(fileId);
+
+      if (!file) {
+        req.flash("error", "No file found");
+        return res.redirect(dashboardRoute);
+      }
+
+      req.flash("error", errors);
+      return res.redirect(`/file/update/${fileId}`);
+    }
+
+    const data = matchedData(req);
+    const updatedFile = await File.updateFileName(data);
+
+    if (updatedFile.folder_id === null) {
+      return res.status(200).redirect(dashboardRoute);
+    }
+
+    res.status(200).redirect(`/folder/files/${updatedFile.folder_id}`);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function shareFile(req, res, next) {
+  try {
+    const result = validationResult(req);
+    const dashboardRoute = "/dashboard";
+
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      const hasIdError = errors.some((error) => error.path === "file_id");
+
+      if (hasIdError) {
+        req.flash("error", errors);
+        return res.redirect(dashboardRoute);
+      }
+
+      const fileId = req.body.file_id;
+      const file = await File.getFileDetails(fileId);
+
+      if (!file) {
+        req.flash("error", "No file was found");
+        return res.redirect(dashboardRoute);
+      }
+
+      return res.redirect(file.folder_id ? `/folder/files/${fileId}` : dashboardRoute);
+    }
+
+    const reqData = matchedData(req);
+    const fileId = parseInt(reqData.file_id);
+    const fileHistory = await prisma.shared_files.findMany({
+      where: {
+        file_id: fileId,
+      },
+      include: {
+        files: {
+          select: {
+            folder_id: true,
+          }
+        }
+      }
+    });
+
+    if (isSharedFile(fileHistory)) {
+      const fileData = fileHistory[0];
+      req.flash("error", "File has already been shared");
+      return res.redirect(fileData.files.folder_id ? `/folder/files/${fileData.files.folder_id}` :  dashboardRoute);
+    }
+
+    const expirationDays = parseInt(req.body.expiration_days);
+    const milisecondsPerDay = 24 * 60 * 60 * 1000;
+    const expirationTimeMiliseconds =
+      Date.now() + expirationDays * milisecondsPerDay;
+    const expirationDate = new Date(expirationTimeMiliseconds);
+
+    const data = {
+      user_id: req.session.passport.user,
       file_id: fileId,
-    },
-  });
+      expires_at: expirationDate,
+    };
 
-  if (isSharedFile(fileHistory)) {
-    return res.send("<h1>File already shared</h1>");
-  }
-
-  const expirationDays = parseInt(req.body.expiration_days);
-  const milisecondsPerDay = 24 * 60 * 60 * 1000;
-  const expirationTimeMiliseconds =
-    Date.now() + expirationDays * milisecondsPerDay;
-  const expirationDate = new Date(expirationTimeMiliseconds);
-
-  const data = {
-    user_id: req.session.passport.user,
-    file_id: fileId,
-    expires_at: expirationDate,
-  };
-
-  const sharedFile = await prisma.shared_files.create({
-    data: data,
-    include: {
-      files: {
-        select: {
-          folder_id: true,
+    const sharedFile = await prisma.shared_files.create({
+      data: data,
+      include: {
+        files: {
+          select: {
+            folder_id: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (sharedFile.files.folder_id === null) {
-    return res.status(201).redirect("/dashboard");
+    if (sharedFile.files.folder_id === null) {
+      return res.redirect(dashboardRoute);
+    }
+
+    res.redirect(`/folder/files/${sharedFile.files.folder_id}`);
+
+  } catch (err) {
+    next(err);
   }
-
-  res.status(201).redirect(`/folder/files/${sharedFile.files.folder_id}`);
 }
 
 module.exports = {
