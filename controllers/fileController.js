@@ -1,4 +1,5 @@
 const File = require("../models/File");
+const Folder = require("../models/Folder");
 const cloudinary = require("cloudinary").v2;
 const { convertBytes, isSharedFile } = require("../helpers/helpers");
 const prisma = require("../lib/prisma");
@@ -213,10 +214,79 @@ async function shareFile(req, res, next) {
   }
 }
 
+async function uploadFile(req, res, next) {
+  try {
+    const r = validationResult(req);
+
+    if (!r.isEmpty()) {
+      req.flash("error", r.array());
+      res.redirect("/dashboard");
+    }
+
+    const data = matchedData(req);
+    const folderId = data.folder_id ? parseInt(data.folder_id) : null;
+
+    if (folderId && !await Folder.getFolder(folderId)) {
+      req.flash("error", "Invalid folder");
+      return res.redirect("/dashboard");
+    }
+
+    const mb = 1048576;
+    // Max size is 100mb for video, for everything else is 10mb
+    if (
+      (!req.file.mimetype.includes("video") &&
+        req.file.buffer.length > mb * 10) ||
+      (req.file.mimetype.includes("video") && req.file.buffer.length > mb * 100)
+    ) {
+      req.flash("error","The file is too large (100 MB Max for video and 10 MB for other type of files)");
+      return res.redirect(folderId ? `/folder/files/${folderId}` : "/dashboard");
+    }
+
+    const byteArrayBuffer = req.file.buffer;
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { resource_type: "auto", folder: "file_uploader" },
+          (error, uploadResult) => {
+            if (error) {
+              return reject(error);
+            }
+            return resolve(uploadResult);
+          },
+        )
+        .end(byteArrayBuffer);
+    });
+
+    const fileData = {
+      file_name: req.file.originalname,
+      url: result.secure_url,
+      folder_id: folderId,
+      cloudinary_public_id: result.public_id,
+      cloudinary_resource_type: result.resource_type,
+      bytes: result.bytes,
+      mime_type: req.file.mimetype,
+      user_id: req.session.passport.user,
+    };
+
+    await prisma.files.create({
+      data: fileData,
+    });
+
+    if (folderId === null) {
+      return res.status(201).redirect("/dashboard");
+    }
+
+    res.status(201).redirect(`/folder/files/${folderId}`);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   deleteFile,
   getFileDetails,
   getUpdateFileNameView,
   updateFileName,
   shareFile,
+  uploadFile
 };

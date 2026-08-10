@@ -55,11 +55,12 @@ auth.get("/log-in", authController.getLogin);
 auth.get("/sign-up", authController.getSignUp);
 
 const signUpValidators = validateSignUp();
-auth.post("/sign-up", authController.postSignup);
+auth.post("/sign-up", [...signUpValidators] ,authController.postSignup);
 
 const loginValidators = validateLogIn();
 auth.post(
   "/log-in",
+  [...loginValidators],
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/log-in",
