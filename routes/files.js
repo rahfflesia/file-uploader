@@ -7,6 +7,7 @@ const cloudinary = require("cloudinary").v2;
 const Folder = require("../models/Folder");
 const { convertBytes } = require("../helpers/helpers");
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const { validateDeleteFile } = require("../validators/fileValidators");
 
 const prisma = require("../lib/prisma");
 
@@ -79,7 +80,8 @@ file.post("/upload", upload.single("archivo"), async (req, res) => {
   res.status(201).redirect(`/folder/files/${folderId}`);
 });
 
-file.get("/delete/:file_id", fileController.deleteFile);
+const deleteFileValidators = validateDeleteFile();
+file.get("/delete/:file_id", [...deleteFileValidators] ,fileController.deleteFile);
 
 file.get("/details/:file_id", fileController.getFileDetails);
 

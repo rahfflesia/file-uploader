@@ -2,30 +2,75 @@ const File = require("../models/File");
 const cloudinary = require("cloudinary").v2;
 const { convertBytes, isSharedFile } = require("../helpers/helpers");
 const prisma = require("../lib/prisma");
+const { validationResult, matchedData } = require("express-validator");
 
-async function deleteFile(req, res) {
-  const fileId = req.params.file_id;
-  const deletedFile = await File.deleteFile(fileId);
-  await cloudinary.uploader.destroy(deletedFile.cloudinary_public_id, {
-    resource_type: deletedFile.cloudinary_resource_type,
-    invalidate: true,
-  });
+async function deleteFile(req, res, next) {
+  try {
+    const result = validationResult(req);
 
-  if (deletedFile.folder_id === null) {
-    return res.status(200).redirect("/dashboard");
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      const hasIdError = errors.some((error) => error.path === "file_id");
+
+      req.flash("error", errors);
+
+      if (hasIdError) {
+        return res.redirect("/dashboard");
+      }
+
+      const fileId = Number(req.body.file_id);
+      const file = await File.getFileDetails(fileId);
+
+      if (!file) {
+        req.flash("error", "No file was found");
+        return res.redirect("/dashboard");
+      }
+
+      return res.redirect(file.folder_id ? `/folder/files/${file.folder_id}` : "/dashboard");
+    }
+
+    const data = matchedData(req);
+    const fileId = data.file_id;
+
+    const deletedFile = await File.deleteFile(fileId);
+    await cloudinary.uploader.destroy(deletedFile.cloudinary_public_id, {
+      resource_type: deletedFile.cloudinary_resource_type,
+      invalidate: true,
+    });
+
+    if (deletedFile.folder_id === null) {
+      return res.redirect("/dashboard");
+    }
+
+    res.redirect(`/folder/files/${deletedFile.folder_id}`);
+
+  } catch (err) {
+    next(err);
   }
-
-  res.redirect(`/folder/files/${deletedFile.folder_id}`);
 }
 
-async function getFileDetails(req, res) {
-  const fileId = req.params.file_id;
-  const file = await File.getFileDetails(fileId);
-  const formatedFile = {
-    ...file,
-    size: convertBytes(file.bytes),
-  };
-  res.status(200).render("./files/fileDetails", { file: formatedFile });
+async function getFileDetails(req, res, next) {
+  try {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
+    }
+
+    const data = matchedData(req);
+
+    const fileId = data.file_id;
+    const file = await File.getFileDetails(fileId);
+    const formatedFile = {
+      ...file,
+      size: convertBytes(file.bytes),
+    };
+    res.status(200).render("./files/fileDetails", { file: formatedFile });
+  }
+  catch (err) {
+    next(err);
+  }
 }
 
 async function getUpdateFileNameView(req, res) {
@@ -83,8 +128,6 @@ async function shareFile(req, res) {
 
   res.status(201).redirect(`/folder/files/${sharedFile.files.folder_id}`);
 }
-
-async function getSharedFiles(req, res) {}
 
 module.exports = {
   deleteFile,

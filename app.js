@@ -45,6 +45,7 @@ app.use(flash());
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.errors = req.flash("error");
+  console.log(req.session.lastValidUrl);
   next();
 });
 
