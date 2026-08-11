@@ -29,9 +29,11 @@ async function createFolder(req, res, next) {
     await Folder.createFolder(folderData);
 
     if (parentFolderId === null) {
+      req.flash("success", "Folder created successfully");
       return res.status(201).redirect("/dashboard");
     }
 
+    req.flash("success", "Folder created successfully");
     res.status(201).redirect(`/folder/files/${req.body.parent_folder_id}`);
   } catch (err) {
     next(err);
@@ -40,6 +42,7 @@ async function createFolder(req, res, next) {
 
 async function getAllFolderElements(req, res, next) {
   try {
+    const q = req.query.q;
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
@@ -62,6 +65,13 @@ async function getAllFolderElements(req, res, next) {
     }
 
     const folderElements = await Folder.getAllElements(folderId);
+    const filteredFolderElements = q ? folderElements.filter((element) => element.folder_name?.includes(q) || element.file_name?.includes(q)) : folderElements;
+    const source = q ? "search" : "none";
+
+    const searchData = {
+      rootData: filteredFolderElements,
+      source: source,
+    };
 
     async function getPath() {
       let currentFolder = folderData;
@@ -78,7 +88,7 @@ async function getAllFolderElements(req, res, next) {
     const pathArray = (await getPath()).reverse();
 
     res.status(200).render("./folders/folderFiles", {
-      elements: folderElements,
+      elements: searchData,
       folder: folderData,
       pathArray: pathArray,
       areDestructiveActionsEnabled: true,
@@ -115,9 +125,11 @@ async function deleteFolder(req, res, next) {
     const parentFolderId = deletedFolder.parent_folder_id;
 
     if (parentFolderId === null) {
+      req.flash("success", "Folder deleted successfully");
       return res.redirect("/dashboard");
     }
 
+    req.flash("success", "Folder deleted successfully");
     res.redirect(`/folder/files/${parentFolderId}`);
   } catch (err) {
     next(err);

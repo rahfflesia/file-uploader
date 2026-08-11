@@ -22,6 +22,7 @@
     </dialog>
     <%- include("./partials/createFolderModal") %>
     <%- include("./partials/errorToast") %>
+    <%- include("./partials/successToast") %>
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>
@@ -105,17 +106,21 @@
           </div>
         </div>
       </div>
+
       <div class="sm-mb">
         <form action="/dashboard" method="get" class="search-bar-form">
-          <input type="text" name="q" class="search-input" placeholder="Search anything...">
-          <button class="regular-button" type="submit">Search</button>
+          <input type="text" name="q" placeholder="Search anything..." class="search-input">
+          <button type="submit" class="search-icon-button">
+            <img class="search-icon" src="https://img.icons8.com/?size=100&id=7695&format=png&color=ffffff" alt="search-icon">
+          </button>
         </form>
       </div>
+
       <% if(elements.rootData.length > 0) { %>
           <%- include("./partials/table") %>
       <% } else { %>
           <% if(elements.source === "search") { %>
-            <div>No resources found</div>
+            <div>No results</div>
           <% } else { %>
             <div>You have not created any folders yet</div>
           <% } %>

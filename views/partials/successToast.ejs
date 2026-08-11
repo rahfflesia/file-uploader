@@ -1,0 +1,21 @@
+<div class="toast success-toast">
+    <span class="success-message message"></span>
+</div>
+<script defer>
+    const successMessage = <%- JSON.stringify(locals.success ?? null) %>
+
+    if(successMessage && successMessage.length > 0) {
+        const successToast = document.querySelector(".success-toast");
+        const successToastMessage = document.querySelector(".success-message");
+
+        setTimeout(() => {
+            successToast.classList.add('slide');
+        }, 50);
+        
+        successToastMessage.textContent = successMessage[0] ?? "Action completed succesfully";
+
+        setTimeout(() => {
+            successToast.classList.remove('slide');
+        }, 3050);
+    }
+</script>

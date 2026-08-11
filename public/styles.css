@@ -310,20 +310,28 @@ label {
   min-width: 300px;
 }
 
-.error-message {
+.toast {
   position: fixed;
-  background-color: rgb(255, 215, 215);
   z-index: 1;
-  color: rgb(255, 65, 65);
   border-radius: var(--border-radius);
   right: 0;
   margin: 1rem;
   padding: var(--padding);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1.05rem;
   transition: transform 400ms ease 0ms;
-  transform: translateX(110%);
+  transform: translateX(140%);
   max-width: 400px;
+}
+
+.error-message {
+  background-color: rgb(255, 215, 215);
+  color: rgb(255, 65, 65);
+}
+
+.success-toast {
+  background-color: rgb(201, 255, 217);
+  color: rgb(0, 122, 37);
 }
 
 .inner-error-message {
@@ -446,6 +454,22 @@ audio {
 .search-bar-form {
   display: flex;
   gap: 0.5rem;
+}
+
+.search-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.search-icon-button {
+  background-color: var(--blue);
+  padding: .25rem;
+  border: none;
+  border-radius: var(--border-radius);
+  display: grid;
+  place-items: center;
+  border-radius: var(--border-radius);
+  cursor: pointer;
 }
 
 @keyframes fall {

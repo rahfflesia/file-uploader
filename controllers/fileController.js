@@ -31,9 +31,11 @@ async function deleteFile(req, res, next) {
     });
 
     if (deletedFile.folder_id === null) {
+      req.flash("success", "File deleted successfully");
       return res.redirect("/dashboard");
     }
 
+    req.flash("success", "File deleted successfully");
     res.redirect(`/folder/files/${deletedFile.folder_id}`);
   } catch (err) {
     next(err);
@@ -221,7 +223,7 @@ async function uploadFile(req, res, next) {
   try {
     const r = validationResult(req);
 
-    if (!req.file) {
+    if (!req.file || req.file.buffer.length < 1) {
       req.flash("error", "You are trying to upload an empty file");
       return res.redirect("/dashboard");
     }
@@ -232,10 +234,7 @@ async function uploadFile(req, res, next) {
     }
 
     const data = matchedData(req);
-    console.log(data);
     const folderId = req.body.folder_id ? parseInt(req.body.folder_id) : null;
-
-    console.log("Este archivo pertenece a esta carpeta", folderId);
 
     if (folderId && !(await Folder.getFolder(folderId))) {
       req.flash("error", "Invalid folder");

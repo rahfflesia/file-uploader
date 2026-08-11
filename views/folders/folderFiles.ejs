@@ -8,6 +8,7 @@
   </head>
   <body>
     <%- include("../partials/errorToast") %>
+    <%- include("../partials/successToast") %>
     <%- include("../partials/uploadFileModal") %>
     <%- include('../partials/header') %>
     <%- include("../partials/createFolderModal") %>
@@ -84,10 +85,22 @@
           </div>
         </h3>
       </div>
-      <% if([].length > 0) { %>
+    
+      <div class="sm-mb">
+        <form action="/folder/files/<%= folder.folder_id %>" method="get" class="search-bar-form">
+          <input type="text" name="q" class="search-input" placeholder="Search anything...">
+          <button class="regular-button" type="submit">Search</button>
+        </form>
+      </div>
+
+      <% if(elements.rootData.length > 0) { %>
         <%- include("../partials/table") %>
       <% } else { %>
-          <div>This folder has no files</div>
+          <% if(elements.source === "none") { %>
+            <div>This folder has no files</div>
+          <% } else { %>
+            <div>No results</div>
+          <% } %>
       <% } %>
     </main>
   </body>
