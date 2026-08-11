@@ -100,21 +100,25 @@
             </div>
             <div class="flex-column" style="gap: .25rem">
               <span class="gray-text" style="font-size: .8rem;">TOTAL ITEMS</span>
-              <span style="font-weight: 500;"><%= elements.length %> Items</span>
+              <span style="font-weight: 500;"><%= totalItems %> Items</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="search-bar-wrapper sm-mb">
+      <div class="sm-mb">
         <form action="/dashboard" method="get" class="search-bar-form">
           <input type="text" name="q" class="search-input" placeholder="Search anything...">
           <button class="regular-button" type="submit">Search</button>
         </form>
       </div>
-      <% if(elements.length > 0) { %>
+      <% if(elements.rootData.length > 0) { %>
           <%- include("./partials/table") %>
       <% } else { %>
-          <div>You have no created any folders yet</div>
+          <% if(elements.source === "search") { %>
+            <div>No resources found</div>
+          <% } else { %>
+            <div>You have not created any folders yet</div>
+          <% } %>
       <% } %>
     </main>
     <script>

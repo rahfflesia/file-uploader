@@ -50,9 +50,16 @@ async function getDashboard(req, res, next) {
             element.file_name?.includes(q) || element.folder_name?.includes(q),
         )
       : rootData.rootElements;
+    const source = q ? "search" : "dashboard";
+
+    const searchData = {
+      rootData: filteredRootData,
+      source: source,
+    };
 
     res.status(200).render("dashboard", {
-      elements: filteredRootData,
+      totalItems: rootData.rootElements.length,
+      elements: searchData,
       usedStorage: rootData.formattedStorage,
       folder: null,
       path: "/",

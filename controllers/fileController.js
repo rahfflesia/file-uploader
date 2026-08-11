@@ -35,7 +35,6 @@ async function deleteFile(req, res, next) {
     }
 
     res.redirect(`/folder/files/${deletedFile.folder_id}`);
-
   } catch (err) {
     next(err);
   }
@@ -65,8 +64,7 @@ async function getFileDetails(req, res, next) {
       size: convertBytes(file.bytes),
     };
     res.status(200).render("./files/fileDetails", { file: formatedFile });
-  }
-  catch (err) {
+  } catch (err) {
     next(err);
   }
 }
@@ -156,7 +154,9 @@ async function shareFile(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      return res.redirect(file.folder_id ? `/folder/files/${fileId}` : dashboardRoute);
+      return res.redirect(
+        file.folder_id ? `/folder/files/${fileId}` : dashboardRoute,
+      );
     }
 
     const reqData = matchedData(req);
@@ -169,15 +169,19 @@ async function shareFile(req, res, next) {
         files: {
           select: {
             folder_id: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (isSharedFile(fileHistory)) {
       const fileData = fileHistory[0];
       req.flash("error", "File has already been shared");
-      return res.redirect(fileData.files.folder_id ? `/folder/files/${fileData.files.folder_id}` :  dashboardRoute);
+      return res.redirect(
+        fileData.files.folder_id
+          ? `/folder/files/${fileData.files.folder_id}`
+          : dashboardRoute,
+      );
     }
 
     const expirationDays = parseInt(req.body.expiration_days);
@@ -208,7 +212,6 @@ async function shareFile(req, res, next) {
     }
 
     res.redirect(`/folder/files/${sharedFile.files.folder_id}`);
-
   } catch (err) {
     next(err);
   }
@@ -218,15 +221,23 @@ async function uploadFile(req, res, next) {
   try {
     const r = validationResult(req);
 
+    if (!req.file) {
+      req.flash("error", "You are trying to upload an empty file");
+      return res.redirect("/dashboard");
+    }
+
     if (!r.isEmpty()) {
       req.flash("error", r.array());
-      res.redirect("/dashboard");
+      return res.redirect("/dashboard");
     }
 
     const data = matchedData(req);
-    const folderId = data.folder_id ? parseInt(data.folder_id) : null;
+    console.log(data);
+    const folderId = req.body.folder_id ? parseInt(req.body.folder_id) : null;
 
-    if (folderId && !await Folder.getFolder(folderId)) {
+    console.log("Este archivo pertenece a esta carpeta", folderId);
+
+    if (folderId && !(await Folder.getFolder(folderId))) {
       req.flash("error", "Invalid folder");
       return res.redirect("/dashboard");
     }
@@ -238,8 +249,13 @@ async function uploadFile(req, res, next) {
         req.file.buffer.length > mb * 10) ||
       (req.file.mimetype.includes("video") && req.file.buffer.length > mb * 100)
     ) {
-      req.flash("error","The file is too large (100 MB Max for video and 10 MB for other type of files)");
-      return res.redirect(folderId ? `/folder/files/${folderId}` : "/dashboard");
+      req.flash(
+        "error",
+        "The file is too large (100 MB Max for video and 10 MB for other type of files)",
+      );
+      return res.redirect(
+        folderId ? `/folder/files/${folderId}` : "/dashboard",
+      );
     }
 
     const byteArrayBuffer = req.file.buffer;
@@ -288,5 +304,5 @@ module.exports = {
   getUpdateFileNameView,
   updateFileName,
   shareFile,
-  uploadFile
+  uploadFile,
 };

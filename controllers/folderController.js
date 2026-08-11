@@ -149,7 +149,9 @@ async function shareFolder(req, res, next) {
       }
 
       req.flash("error", errors);
-      return res.redirect(folderId ? `/folder/files/${folderId}` : dashboardRoute);
+      return res.redirect(
+        folderId ? `/folder/files/${folderId}` : dashboardRoute,
+      );
     }
 
     const folderHistory = await prisma.shared_folders.findMany({
@@ -173,7 +175,9 @@ async function shareFolder(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      return res.redirect(`/folder/files/${folderData.folders.parent_folder_id}`);
+      return res.redirect(
+        `/folder/files/${folderData.folders.parent_folder_id}`,
+      );
     }
 
     const expirationDays = parseInt(req.body.expiration_days);
