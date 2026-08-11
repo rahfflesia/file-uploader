@@ -1,5 +1,4 @@
 const { param, body } = require("express-validator");
-const Folder = require("../models/Folder");
 
 function validateGetSharedFolder() {
   return [

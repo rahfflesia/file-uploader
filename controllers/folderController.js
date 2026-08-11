@@ -128,22 +128,28 @@ async function deleteFolder(req, res, next) {
 // Luego le hago el refactor
 async function shareFolder(req, res, next) {
   try {
-    const folderId = parseInt(req.body.folder_id);
     const result = validationResult(req);
+    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
-      req.flash("error", result.array());
-      return res.redirect("/dashboard");
-    }
+      const errors = result.array();
+      const hasIdError = errors.some((error) => error.path === "folder_id");
 
-    const folder = await Folder.getFolder(folderId);
+      if (hasIdError) {
+        req.flash("error", errors);
+        return res.redirect(dashboardRoute);
+      }
 
-    if (!folder) {
-      req.flash(
-        "error",
-        "You are trying to share a folder that does not exist",
-      );
-      return res.redirect("/dashboard");
+      const folderId = req.body.folder_id;
+      const folder = await Folder.getFolder(folderId);
+
+      if (!folder) {
+        req.flash("error", "Invalid folder");
+        return res.redirect(dashboardRoute);
+      }
+
+      req.flash("error", errors);
+      return res.redirect(folderId ? `/folder/files/${folderId}` : dashboardRoute);
     }
 
     const folderHistory = await prisma.shared_folders.findMany({
@@ -161,12 +167,13 @@ async function shareFolder(req, res, next) {
 
     if (isSharedFolder(folderHistory)) {
       req.flash("error", "Folder has already been shared");
+      const folderData = folderHistory[0];
 
-      if (folder.parent_folder_id === null) {
-        return res.redirect("/dashboard");
+      if (folderData.folders.parent_folder_id === null) {
+        return res.redirect(dashboardRoute);
       }
 
-      return res.redirect(`/folder/files/${folder.parent_folder_id}`);
+      return res.redirect(`/folder/files/${folderData.folders.parent_folder_id}`);
     }
 
     const expirationDays = parseInt(req.body.expiration_days);
@@ -193,7 +200,7 @@ async function shareFolder(req, res, next) {
     });
 
     if (sharedFolder.folders.parent_folder_id === null) {
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     res.redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);

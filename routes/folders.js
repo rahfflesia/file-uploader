@@ -45,10 +45,10 @@ folder.get(
   folderController.deleteFolder,
 );
 
-const getShareFolderValidators = validateGetSharedFolder();
+const shareFolderValidators = validateShareFolder();
 folder.post(
   "/share",
-  [...getShareFolderValidators],
+  [...shareFolderValidators],
   folderController.shareFolder,
 );
 
