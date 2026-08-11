@@ -40,10 +40,19 @@ async function postSignup(req, res, next) {
 
 async function getDashboard(req, res, next) {
   try {
+    const q = req.query.q;
     const userId = req.session.passport.user;
     const rootData = await Folder.getAllRootElements(userId);
+
+    const filteredRootData = q
+      ? rootData.rootElements.filter(
+          (element) =>
+            element.file_name?.includes(q) || element.folder_name?.includes(q),
+        )
+      : rootData.rootElements;
+
     res.status(200).render("dashboard", {
-      elements: rootData.rootElements,
+      elements: filteredRootData,
       usedStorage: rootData.formattedStorage,
       folder: null,
       path: "/",

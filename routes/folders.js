@@ -46,11 +46,7 @@ folder.get(
 );
 
 const shareFolderValidators = validateShareFolder();
-folder.post(
-  "/share",
-  [...shareFolderValidators],
-  folderController.shareFolder,
-);
+folder.post("/share", [...shareFolderValidators], folderController.shareFolder);
 
 const getUpdateFolderValidators = validateUpdateFolder();
 folder.post(

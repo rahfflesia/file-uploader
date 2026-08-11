@@ -105,6 +105,12 @@
           </div>
         </div>
       </div>
+      <div class="search-bar-wrapper sm-mb">
+        <form action="/dashboard" method="get" class="search-bar-form">
+          <input type="text" name="q" class="search-input" placeholder="Search anything...">
+          <button class="regular-button" type="submit">Search</button>
+        </form>
+      </div>
       <% if(elements.length > 0) { %>
           <%- include("./partials/table") %>
       <% } else { %>
