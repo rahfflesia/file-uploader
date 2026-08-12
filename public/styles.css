@@ -54,6 +54,10 @@ dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 .fu-header {
   border-bottom: 1px solid lightgray;
 }

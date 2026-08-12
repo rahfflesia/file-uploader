@@ -1,5 +1,5 @@
 <header class="flex-between-row fu-header std-padding">
-  <h2 style="font-weight: bolder" class="blue">FileUploader</h2>
+  <h2 style="font-weight: bolder" class="blue app-name pointer">FileUploader</h2>
   <div style="display: flex; gap: 0.75rem; align-items: center">
     <% if(locals.currentUser) { %>
       <% const fullName = locals.currentUser.first_name + ' ' +
@@ -13,3 +13,9 @@
     <% } %>
   </div>
 </header>
+<script defer>
+  const appName = document.querySelector(".app-name");
+  appName.addEventListener("click", function () {
+    window.location.href = "/dashboard";
+  });
+</script>
