@@ -8,12 +8,14 @@ const { validationResult, matchedData } = require("express-validator");
 async function deleteFile(req, res, next) {
   try {
     const result = validationResult(req);
+    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
+    const userId = req.session.passport.user;
     const data = matchedData(req);
     const fileId = data.file_id;
 
@@ -21,7 +23,12 @@ async function deleteFile(req, res, next) {
 
     if (!file) {
       req.flash("error", "No file was found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
+    }
+
+    if(userId !== file.user_id) {
+      req.flash("error", "You don't have the permissions to delete this file");
+      return res.redirect();
     }
 
     const deletedFile = await File.deleteFile(fileId);
@@ -32,7 +39,7 @@ async function deleteFile(req, res, next) {
 
     if (deletedFile.folder_id === null) {
       req.flash("success", "File deleted successfully");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     req.flash("success", "File deleted successfully");
@@ -53,6 +60,7 @@ async function getFileDetails(req, res, next) {
 
     const data = matchedData(req);
 
+    const userId = req.session.passport.user;
     const fileId = data.file_id;
     const file = await File.getFileDetails(fileId);
 
@@ -61,10 +69,16 @@ async function getFileDetails(req, res, next) {
       return res.redirect("/dashboard");
     }
 
+    if(userId !== file.user_id) {
+      req.flash("error", "You don't have the permissions to view this file");
+      return res.redirect("/dashboard");
+    }
+
     const formatedFile = {
       ...file,
       size: convertBytes(file.bytes),
     };
+
     res.status(200).render("./files/fileDetails", { file: formatedFile });
   } catch (err) {
     next(err);
@@ -83,9 +97,15 @@ async function getUpdateFileNameView(req, res, next) {
     const data = matchedData(req);
     const fileId = data.file_id;
     const file = await File.getFileDetails(fileId);
+    const userId = req.session.passport.user;
 
     if (!file) {
       req.flash("error", "No folder was found");
+      return res.redirect("/dashboard");
+    }
+
+    if(userId !== file.user_id) {
+      req.flash("error", "You don't have the permissions to view this file");
       return res.redirect("/dashboard");
     }
 
@@ -111,9 +131,15 @@ async function updateFileName(req, res, next) {
 
       const fileId = Number(req.body.file_id);
       const file = await File.getFileDetails(fileId);
+      const userId = req.session.passport.user;
 
       if (!file) {
         req.flash("error", "No file found");
+        return res.redirect(dashboardRoute);
+      }
+
+      if(userId !== file.user_id) {
+        req.flash("error", "You don't have the permissions to update this file");
         return res.redirect(dashboardRoute);
       }
 
@@ -150,9 +176,15 @@ async function shareFile(req, res, next) {
 
       const fileId = req.body.file_id;
       const file = await File.getFileDetails(fileId);
+      const userId = req.session.passport.user;
 
       if (!file) {
         req.flash("error", "No file was found");
+        return res.redirect(dashboardRoute);
+      }
+
+      if(userId !== file.user_id) {
+        req.flash("error", "You can't share this file");
         return res.redirect(dashboardRoute);
       }
 
@@ -186,7 +218,7 @@ async function shareFile(req, res, next) {
       );
     }
 
-    const expirationDays = parseInt(req.body.expiration_days);
+    const expirationDays = parseInt(reqData.expiration_days);
     const milisecondsPerDay = 24 * 60 * 60 * 1000;
     const expirationTimeMiliseconds =
       Date.now() + expirationDays * milisecondsPerDay;
@@ -210,9 +242,11 @@ async function shareFile(req, res, next) {
     });
 
     if (sharedFile.files.folder_id === null) {
+      req.flash("success", "File shared successfully");
       return res.redirect(dashboardRoute);
     }
 
+    req.flash("success", "File shared successfully");
     res.redirect(`/folder/files/${sharedFile.files.folder_id}`);
   } catch (err) {
     next(err);
@@ -222,6 +256,7 @@ async function shareFile(req, res, next) {
 async function uploadFile(req, res, next) {
   try {
     const r = validationResult(req);
+    const userId = req.session.passport.user;
 
     if (!req.file || req.file.buffer.length < 1) {
       req.flash("error", "You are trying to upload an empty file");
@@ -234,10 +269,17 @@ async function uploadFile(req, res, next) {
     }
 
     const data = matchedData(req);
-    const folderId = req.body.folder_id ? parseInt(req.body.folder_id) : null;
+    const folderId = data.folder_id ? parseInt(data.folder_id) : null;
 
     if (folderId && !(await Folder.getFolder(folderId))) {
       req.flash("error", "Invalid folder");
+      return res.redirect("/dashboard");
+    }
+
+    const folder = await Folder.getFolder(folderId);
+
+    if(userId !== folder.user_id) {
+      req.flash("error", "You can't upload files to this folder");
       return res.redirect("/dashboard");
     }
 
@@ -280,7 +322,7 @@ async function uploadFile(req, res, next) {
       cloudinary_resource_type: result.resource_type,
       bytes: result.bytes,
       mime_type: req.file.mimetype,
-      user_id: req.session.passport.user,
+      user_id: userId,
     };
 
     await prisma.files.create({
@@ -288,9 +330,11 @@ async function uploadFile(req, res, next) {
     });
 
     if (folderId === null) {
+      req.flash("success", "File uploaded successfully");
       return res.status(201).redirect("/dashboard");
     }
 
+    req.flash("success", "File uploaded successfully");
     res.status(201).redirect(`/folder/files/${folderId}`);
   } catch (err) {
     next(err);

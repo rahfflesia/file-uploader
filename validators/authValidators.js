@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, query } = require("express-validator");
 const User = require("../models/User");
 
 function validateSignUp() {
@@ -89,7 +89,23 @@ function validateLogIn() {
   ];
 }
 
+function validateDashboard() {
+  return [ 
+  query("q")
+  .optional({ values: "undefined" })
+  .isString()
+  .withMessage("Invalid search term")
+  .bail()
+  .trim()
+  .notEmpty()
+  .withMessage("The search term cannot be empty")
+  .bail()
+  .isLength({min: 1, max: 2048})
+  .withMessage("The search term is too long") ];
+}
+
 module.exports = {
   validateSignUp,
   validateLogIn,
+  validateDashboard
 };

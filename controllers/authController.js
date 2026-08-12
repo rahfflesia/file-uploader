@@ -40,7 +40,17 @@ async function postSignup(req, res, next) {
 
 async function getDashboard(req, res, next) {
   try {
-    const q = req.query.q;
+    const result = validationResult(req);
+
+    if(!result.isEmpty()) {
+      console.log("Entré aquí");
+      req.flash("error", result.array());
+      return res.redirect("/dashboard");
+    }
+
+    const data = matchedData(req);
+    const q = data.q;
+
     const userId = req.session.passport.user;
     const rootData = await Folder.getAllRootElements(userId);
 

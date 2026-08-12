@@ -1,4 +1,4 @@
-const { param, body } = require("express-validator");
+const { param, body, query } = require("express-validator");
 
 function validateGetSharedFolder() {
   return [
@@ -49,7 +49,13 @@ function validateGetFolderFiles() {
       .bail()
       .trim()
       .notEmpty()
-      .withMessage("The id cannot be empty"),
+      .withMessage("The id cannot be empty")        
+    .trim()
+    .notEmpty()
+    .withMessage("The search term cannot be empty")
+    .bail()
+    .isLength({min: 1, max: 2048})
+    .withMessage("The search term is too long")
   ];
 }
 

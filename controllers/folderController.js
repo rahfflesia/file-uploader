@@ -1,7 +1,7 @@
 const prisma = require("../lib/prisma");
 const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
-const { validationResult } = require("express-validator");
+const { validationResult, matchedData } = require("express-validator");
 
 async function createFolder(req, res, next) {
   try {
@@ -14,14 +14,16 @@ async function createFolder(req, res, next) {
       req.flash("error", result.array());
 
       if (!parentFolderId) {
-        return res.status(404).redirect("/dashboard");
+        return res.redirect("/dashboard");
       } else {
-        return res.status(404).redirect(`/folder/files/${parentFolderId}`);
+        return res.redirect(`/folder/files/${parentFolderId}`);
       }
     }
 
+    const data = matchedData(req);
+
     const folderData = {
-      folder_name: req.body.folder_name,
+      folder_name: data.folder_name,
       user_id: req.session.passport.user,
       parent_folder_id: parentFolderId,
     };
@@ -42,7 +44,6 @@ async function createFolder(req, res, next) {
 
 async function getAllFolderElements(req, res, next) {
   try {
-    const q = req.query.q;
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
@@ -50,8 +51,9 @@ async function getAllFolderElements(req, res, next) {
       return res.redirect("/dashboard");
     }
 
+    const data = matchedData(req);
     const userId = req.session.passport.user;
-    const folderId = parseInt(req.params.folder_id);
+    const folderId = parseInt(data.folder_id);
     const folderData = await Folder.getFolder(folderId);
 
     if (!folderData) {
@@ -64,6 +66,7 @@ async function getAllFolderElements(req, res, next) {
       return res.redirect("/dashboard");
     }
 
+    const q = data.q;
     const folderElements = await Folder.getAllElements(folderId);
     const filteredFolderElements = q ? folderElements.filter((element) => element.folder_name?.includes(q) || element.file_name?.includes(q)) : folderElements;
     const source = q ? "search" : "none";
@@ -107,8 +110,9 @@ async function deleteFolder(req, res, next) {
       return res.redirect("/dashboard");
     }
 
+    const data = matchedData(req);
     const userId = req.session.passport.user;
-    const folderId = req.params.folder_id;
+    const folderId = data.folder_id;
     const folder = await Folder.getFolder(folderId);
 
     if (!folder) {
@@ -154,9 +158,15 @@ async function shareFolder(req, res, next) {
 
       const folderId = req.body.folder_id;
       const folder = await Folder.getFolder(folderId);
+      const userId = req.session.passport.user;
 
       if (!folder) {
         req.flash("error", "Invalid folder");
+        return res.redirect(dashboardRoute);
+      }
+
+      if(userId !== folder.user_id) {
+        req.flash("error", "You can't share this folder");
         return res.redirect(dashboardRoute);
       }
 
@@ -166,9 +176,11 @@ async function shareFolder(req, res, next) {
       );
     }
 
+    const reqData = matchedData(req);
+
     const folderHistory = await prisma.shared_folders.findMany({
       where: {
-        folder_id: parseInt(req.body.folder_id),
+        folder_id: parseInt(reqData.folder_id),
       },
       include: {
         folders: {
@@ -179,9 +191,10 @@ async function shareFolder(req, res, next) {
       },
     });
 
+    const folderData = folderHistory[0];
+
     if (isSharedFolder(folderHistory)) {
       req.flash("error", "Folder has already been shared");
-      const folderData = folderHistory[0];
 
       if (folderData.folders.parent_folder_id === null) {
         return res.redirect(dashboardRoute);
@@ -192,7 +205,7 @@ async function shareFolder(req, res, next) {
       );
     }
 
-    const expirationDays = parseInt(req.body.expiration_days);
+    const expirationDays = parseInt(data.expiration_days);
     const milisecondsPerDay = 24 * 60 * 60 * 1000;
     const expirationTimeMiliseconds =
       Date.now() + expirationDays * milisecondsPerDay;
@@ -200,7 +213,7 @@ async function shareFolder(req, res, next) {
 
     const data = {
       user_id: req.session.passport.user,
-      folder_id: parseInt(req.body.folder_id),
+      folder_id: parseInt(data.folder_id),
       expires_at: expirationDate,
     };
 
@@ -216,9 +229,11 @@ async function shareFolder(req, res, next) {
     });
 
     if (sharedFolder.folders.parent_folder_id === null) {
+      req.flash("success", "Folder shared successfully");
       return res.redirect(dashboardRoute);
     }
 
+    req.flash("success", "Folder shared successfully");
     res.redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
   } catch (err) {
     next(err);
@@ -234,7 +249,8 @@ async function getSharedFolder(req, res, next) {
       return res.redirect("/dashboard");
     }
 
-    const uuid = req.params.uuid;
+    const data = matchedData(req);
+    const uuid = data.uuid;
 
     const sharedFolder = await Folder.findSharedFolder(uuid);
     const sharedFile = await Folder.findSharedFile(uuid);
@@ -302,17 +318,24 @@ async function getSharedFolder(req, res, next) {
 async function getUpdateFolderView(req, res, next) {
   try {
     const result = validationResult(req);
+    const userId = req.session.passport.user;
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
       return res.redirect("/dashboard");
     }
 
-    const folderId = parseInt(req.params.folder_id);
+    const reqData = matchedData(req);
+    const folderId = parseInt(reqData.folder_id);
     const folder = await Folder.getFolder(folderId);
 
     if (!folder) {
       req.flash("error", "No folder was found");
+      return res.redirect("/dashboard");
+    }
+
+    if(userId !== folder.user_id) {
+      req.flash("error", "You don't have access to this folder");
       return res.redirect("/dashboard");
     }
 
@@ -347,12 +370,23 @@ async function updateFolderName(req, res, next) {
       return res.redirect("/dashboard");
     }
 
-    const updatedFolder = await Folder.updateFolderName(req.body);
+    const data = matchedData(req);
+    const userId = req.session.passport.user;
+    const folder = await Folder.getFolder(userId);
 
-    if (updatedFolder.parent_folder_id === null) {
+    if(userId !== folder.user_id) {
+      req.error("error", "You cannot update this folder");
       return res.redirect("/dashboard");
     }
 
+    const updatedFolder = await Folder.updateFolderName(data);
+
+    if (updatedFolder.parent_folder_id === null) {
+      req.flash("success", "Folder updated successfully");
+      return res.redirect("/dashboard");
+    }
+
+    req.flash("success", "Folder updated successfully");
     res.redirect(`/folder/files/${updatedFolder.parent_folder_id}`);
   } catch (err) {
     next(err);

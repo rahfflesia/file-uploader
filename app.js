@@ -16,6 +16,7 @@ const User = require("./models/User");
 const authController = require("./controllers/authController");
 
 const { isAuthenticated } = require("./middleware/authMiddleware");
+const { validateDashboard } = require("./validators/authValidators");
 
 const port = 8080;
 const assetsPath = path.join(__dirname, "public");
@@ -61,7 +62,8 @@ app.get("/", (req, res) => {
   res.status(200).redirect("/dashboard");
 });
 
-app.get("/dashboard", isAuthenticated, authController.getDashboard);
+const dashboardValidators = validateDashboard();
+app.get("/dashboard", [isAuthenticated, ...dashboardValidators] , authController.getDashboard);
 
 // 404 error middleware handler
 app.use((req, res, next) => {
