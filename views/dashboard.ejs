@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/dashboard/dashboard.css">
   </head>
-  <body>
+  <body class="mh-100dvh flex-column">
     <dialog class="link-dialog">
       <div class="link-dialog-wrapper">
         <div class="flex-between-row">
@@ -67,7 +67,7 @@
     </dialog>
     <%- include("./partials/uploadFileModal") %>
     <%- include('./partials/header') %>
-    <main class="std-padding dashboard">
+    <main class="std-padding dashboard flex-column flex-1">
       <div class="subheader flex-between-row sm-mb">
         <div style="display: flex; flex-direction: column; gap: .25rem;">
           <% const fullName = locals.currentUser.first_name + ' ' + locals.currentUser.last_name %>
@@ -120,9 +120,19 @@
           <%- include("./partials/table") %>
       <% } else { %>
           <% if(elements.source === "search") { %>
-            <div>No results</div>
+            <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=jos3LB58rh8D&format=png&color=1b71e1" alt="no-results-icon">
+              </div>
+              <span>No results found</span>
+            </div>
           <% } else { %>
-            <div>You have not created any folders yet</div>
+            <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=83172&format=png&color=1b71e1" alt="no-folders-icon">
+              </div>
+              <span>You have not created any folders yet</span>
+            </div>
           <% } %>
       <% } %>
     </main>

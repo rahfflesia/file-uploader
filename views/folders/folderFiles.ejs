@@ -6,7 +6,7 @@
     <title>Folder files</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
-  <body>
+  <body class="mh-100dvh flex-column">
     <%- include("../partials/errorToast") %>
     <%- include("../partials/successToast") %>
     <%- include("../partials/uploadFileModal") %>
@@ -66,7 +66,7 @@
         <button type="submit" class="regular-button">Share</button>
       </form>
     </dialog>
-    <main class="std-padding dashboard">
+    <main class="flex-column flex-1 std-padding dashboard">
       <div class="flex-between-row sm-mb">
         <h2><span class="blue"><%= folder.folder_name %></span> <span>content</span></h2>
         <div>
@@ -97,9 +97,19 @@
         <%- include("../partials/table") %>
       <% } else { %>
           <% if(elements.source === "none") { %>
-            <div>This folder has no files</div>
+            <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=CslWyEDXb961&format=png&color=1b71e1" alt="no-folders-icon">
+              </div>
+              <span>This folder has no content</span>
+            </div>
           <% } else { %>
-            <div>No results</div>
+            <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=jos3LB58rh8D&format=png&color=1b71e1" alt="no-results-icon">
+              </div>
+              <span>No results found</span>
+            </div>
           <% } %>
       <% } %>
     </main>

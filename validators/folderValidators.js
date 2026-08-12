@@ -49,7 +49,10 @@ function validateGetFolderFiles() {
       .bail()
       .trim()
       .notEmpty()
-      .withMessage("The id cannot be empty")        
+      .withMessage("The id cannot be empty"),  
+    query("q")
+    .optional({values: "undefined"}) 
+    .isString().withMessage("Invalid search term").bail()     
     .trim()
     .notEmpty()
     .withMessage("The search term cannot be empty")

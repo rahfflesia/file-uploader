@@ -476,6 +476,59 @@ audio {
   cursor: pointer;
 }
 
+.not-found-section {
+  flex: 1;
+}
+
+/* Needs to have flex-column class to work */
+.not-found-section > div {
+  gap: .5rem;
+}
+
+#status-code {
+  font-size: clamp(4rem, 10vw, 6rem);
+  text-align: center;
+}
+
+.status-message {
+  text-align: center;
+  font-weight: 500;
+  font-size: clamp(.8rem, 6vw, 1.5rem);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.no-folders-wrapper {
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 500;
+}
+
+.no-folders-wrapper img {
+  width: 80px;
+  height: 80px;
+}
+
+.no-folders-wrapper span {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.25rem;
+}
+
+.no-folders-img-wrapper {
+  display: grid;
+  place-items: center;
+  color: rgb(27, 113, 225);
+  background-color: rgba(27, 113, 225, 0.1);
+  padding: calc(var(--padding) * .75);
+  border-radius: var(--border-radius);
+}
+
+
+
 @keyframes fall {
   from {
     transform: translateY(-50%);

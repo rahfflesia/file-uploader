@@ -65,9 +65,11 @@ app.get("/", (req, res) => {
 const dashboardValidators = validateDashboard();
 app.get("/dashboard", [isAuthenticated, ...dashboardValidators] , authController.getDashboard);
 
+app.get("/not-found", (req, res) => res.render("./404"));
+
 // 404 error middleware handler
 app.use((req, res, next) => {
-  res.status(404).send("<h1>Not found</h1>");
+  res.redirect("/not-found");
 });
 
 // Error handling middleware
