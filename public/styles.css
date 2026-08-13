@@ -74,7 +74,8 @@ dialog::backdrop {
 }
 
 .actions-buttons-subheader {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
   gap: 0.5rem;
 }
 
@@ -89,7 +90,6 @@ dialog::backdrop {
 
 .table,
 .table-row {
-  overflow-x: auto;
 }
 
 .table-header {
@@ -537,6 +537,13 @@ audio {
   border-radius: var(--border-radius);
 }
 
+.folder-name {
+  max-width: 30ch;
+  white-space: no-wrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @keyframes fall {
   from {
     transform: translateY(-50%);
@@ -547,6 +554,22 @@ audio {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.options {
+  padding: .5rem;
+  border-radius: var(--border-radius);
+  display: none;
+  flex: none;
+}
+
+.options img {
+  width: 20px;
+  height: 20px;
+}
+
+.options:hover {
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 @media (width <= 500px) {
@@ -563,19 +586,20 @@ audio {
   .file-preview-wrapper {
     max-width: none;
   }
-
-  .actions-buttons-subheader {
-    width: 100%;
-  }
-
-  .actions-buttons-subheader > * {
-    flex: 1;
-  }
 }
 
 @media (width <= 700px) {
   .fu-header,
   .dashboard {
     padding: var(--padding);
+  }
+
+  .table-header > *:not(:first-child), 
+  .table-row > *:not(:first-child, .options) {
+    display: none !important;
+  }
+
+  .options {
+    display: grid;
   }
 }

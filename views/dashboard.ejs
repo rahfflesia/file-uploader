@@ -74,11 +74,11 @@
           <h2><%= fullName %>'s uploads</h2>
           <span class="gray-text" style="font-size: .8rem;">Manage and organize your storage assets</span>
         </div>
-        <div class="actions-buttons-subheader">
+      </div>
+      <div class="actions-buttons-subheader sm-mb">
           <button class="create-folder-button regular-button">Create new folder</button>
           <button class="regular-button upload-file-button">Upload file</button>
         </div>
-      </div>
       <div class="sm-mb">
         <h3>Path <span class="blue"><%= path %></span></h3>
       </div>
@@ -110,8 +110,8 @@
       <div class="sm-mb">
         <form action="/dashboard" method="get" class="search-bar-form">
           <input type="text" name="q" placeholder="Search anything..." class="search-input">
-          <button type="submit" class="search-icon-button">
-            <img class="search-icon" src="https://img.icons8.com/?size=100&id=7695&format=png&color=ffffff" alt="search-icon">
+          <button type="submit" class="regular-button">
+            Search
           </button>
         </form>
       </div>
