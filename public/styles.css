@@ -559,8 +559,17 @@ audio {
 .options {
   padding: .5rem;
   border-radius: var(--border-radius);
-  display: none;
+  display: grid;
   flex: none;
+  position: relative;
+}
+
+.options-list {
+  position: absolute;
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  z-index: 1;
+  margin-bottom: 2rem;
 }
 
 .options img {
