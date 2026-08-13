@@ -70,6 +70,12 @@ dialog::backdrop {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.actions-buttons-subheader {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .sm-mb {
@@ -105,6 +111,10 @@ a:visited {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.info-cards > * {
+  flex: 1 1 100%;
 }
 
 .info-cards img {
@@ -467,7 +477,7 @@ audio {
 
 .search-icon-button {
   background-color: var(--blue);
-  padding: .25rem;
+  padding: 0.25rem;
   border: none;
   border-radius: var(--border-radius);
   display: grid;
@@ -482,7 +492,7 @@ audio {
 
 /* Needs to have flex-column class to work */
 .not-found-section > div {
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 #status-code {
@@ -493,7 +503,7 @@ audio {
 .status-message {
   text-align: center;
   font-weight: 500;
-  font-size: clamp(.8rem, 6vw, 1.5rem);
+  font-size: clamp(0.8rem, 6vw, 1.5rem);
 }
 
 .flex-1 {
@@ -523,11 +533,9 @@ audio {
   place-items: center;
   color: rgb(27, 113, 225);
   background-color: rgba(27, 113, 225, 0.1);
-  padding: calc(var(--padding) * .75);
+  padding: calc(var(--padding) * 0.75);
   border-radius: var(--border-radius);
 }
-
-
 
 @keyframes fall {
   from {
@@ -554,6 +562,14 @@ audio {
 
   .file-preview-wrapper {
     max-width: none;
+  }
+
+  .actions-buttons-subheader {
+    width: 100%;
+  }
+
+  .actions-buttons-subheader > * {
+    flex: 1;
   }
 }
 

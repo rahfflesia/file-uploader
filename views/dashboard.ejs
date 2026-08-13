@@ -68,13 +68,13 @@
     <%- include("./partials/uploadFileModal") %>
     <%- include('./partials/header') %>
     <main class="std-padding dashboard flex-column flex-1">
-      <div class="subheader flex-between-row sm-mb">
+      <div class="subheader flex-between-row sm-mb" style="gap: 1.5rem;">
         <div style="display: flex; flex-direction: column; gap: .25rem;">
           <% const fullName = locals.currentUser.first_name + ' ' + locals.currentUser.last_name %>
           <h2><%= fullName %>'s uploads</h2>
           <span class="gray-text" style="font-size: .8rem;">Manage and organize your storage assets</span>
         </div>
-        <div>
+        <div class="actions-buttons-subheader">
           <button class="create-folder-button regular-button">Create new folder</button>
           <button class="regular-button upload-file-button">Upload file</button>
         </div>

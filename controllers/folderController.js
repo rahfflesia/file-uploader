@@ -68,7 +68,12 @@ async function getAllFolderElements(req, res, next) {
 
     const q = data.q;
     const folderElements = await Folder.getAllElements(folderId);
-    const filteredFolderElements = q ? folderElements.filter((element) => element.folder_name?.includes(q) || element.file_name?.includes(q)) : folderElements;
+    const filteredFolderElements = q
+      ? folderElements.filter(
+          (element) =>
+            element.folder_name?.includes(q) || element.file_name?.includes(q),
+        )
+      : folderElements;
     const source = q ? "search" : "none";
 
     const searchData = {
@@ -165,7 +170,7 @@ async function shareFolder(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      if(userId !== folder.user_id) {
+      if (userId !== folder.user_id) {
         req.flash("error", "You can't share this folder");
         return res.redirect(dashboardRoute);
       }
@@ -334,7 +339,7 @@ async function getUpdateFolderView(req, res, next) {
       return res.redirect("/dashboard");
     }
 
-    if(userId !== folder.user_id) {
+    if (userId !== folder.user_id) {
       req.flash("error", "You don't have access to this folder");
       return res.redirect("/dashboard");
     }
@@ -374,7 +379,7 @@ async function updateFolderName(req, res, next) {
     const userId = req.session.passport.user;
     const folder = await Folder.getFolder(userId);
 
-    if(userId !== folder.user_id) {
+    if (userId !== folder.user_id) {
       req.error("error", "You cannot update this folder");
       return res.redirect("/dashboard");
     }
