@@ -601,6 +601,20 @@ audio {
   background-color: rgba(0, 0, 0, 0.06);
 }
 
+.resource-details:open {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.resource-details {
+  &  {
+    .resource-size, .resource-upload-date {
+      font-weight: 500;
+    }
+  }
+}
+
 @media (width <= 500px) {
   .file-details > * {
     width: 100%;

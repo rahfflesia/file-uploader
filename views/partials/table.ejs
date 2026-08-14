@@ -96,7 +96,7 @@
                 <% } %>
                     <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                         <img src="https://img.icons8.com/?size=100&id=utVqz5OlvGCj&format=png&color=1b71e1" alt="details-icon">
-                        <div class="blue">Details</div>
+                        <div class="blue" onclick="openResourceDetailsDialog(<%= JSON.stringify(element) %>)">Details</div>
                     </div>
                     <div class="close-options-list" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                         <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=ff0000" alt="close-options-list-icon">
@@ -124,13 +124,13 @@
        });
     });
 
-    const closeButtons = document.querySelectorAll(".close-options-list");
+    const optionsListChildren = document.querySelectorAll(".options-list > * ");
 
-    closeButtons.forEach((closeButton, index) => {
-        closeButton.addEventListener("click", (event) => {
+    optionsListChildren.forEach((child, index) => {
+        child.addEventListener("click", (event) => {
             // Avoid event bubbling
             event.stopPropagation();
-            closeButton.parentElement.classList.remove("show-options-list");
+            child.parentElement.classList.remove("show-options-list");
         });
     });
 </script>
