@@ -62,13 +62,75 @@
             </span>
             <div class="options pointer grid-center">
                 <img src="https://img.icons8.com/?size=100&id=84119&format=png&color=000000" alt="more-options">
+                <div class="options-list box-shadow">
+                    <div style="display: flex; gap: .25rem; justify-content: flex-start; align-items: center;">
+                        <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                        <button class="download-file-button share-folder-button">Download</button>
+                    </div>
+                    <% if(areDestructiveActionsEnabled) { %>
+                    <% if(element.type === "folder") { %>
+                    <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                      <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
+                      <button class="share-folder-button" onclick="shareFolder(<%= element.folder_id %>)">Share</button>
+                    </div>
+                    <% } else if (element.type === "file") { %> 
+                        <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
+                        <button class="share-folder-button" onclick="shareFile(<%= element.file_id %>)">Share</button>
+                        </div>
+                    <% } %>
+                    <% if(element.share_link !== null) { %>
+                        <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
+                        <button onclick="viewShareLink(<%= JSON.stringify(element) %>)" class="view-link-button">Link</button>
+                        </div>
+                    <% } %>
+                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-folder-icon">
+                        <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
+                    </div>
+                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
+                        <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/delete/${element.file_id}` %>" class="delete">Delete</a>
+                    </div>
+                <% } %>
+                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=utVqz5OlvGCj&format=png&color=1b71e1" alt="details-icon">
+                        <div class="blue">Details</div>
+                    </div>
+                    <div class="close-options-list" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=ff0000" alt="close-options-list-icon">
+                        <div class="delete">Close</div>
+                    </div>
+                </div>
             </div>
         </div>
     <% }); %>
-    <div class="options-list box-shadow">
-        <span>Download</span>
-        <span>Share</span>
-        <span>Edit</span>
-        <span>Delete</span>
-    </div>
 </div>
+<script defer>
+    const options = document.querySelectorAll(".options");
+    const optionsList = document.querySelectorAll(".options-list");
+
+    options.forEach((option, index) => {
+        const optionList = optionsList[index];
+       option.addEventListener("click", () => {
+        optionList.classList.add("show-options-list");
+        for(let i = 0; i < optionsList.length; i++) {
+            const element = optionsList[i];
+            if(i !== index) {
+                element.classList.remove("show-options-list");
+            }
+        }
+       });
+    });
+
+    const closeButtons = document.querySelectorAll(".close-options-list");
+
+    closeButtons.forEach((closeButton, index) => {
+        closeButton.addEventListener("click", (event) => {
+            // Avoid event bubbling
+            event.stopPropagation();
+            closeButton.parentElement.classList.remove("show-options-list");
+        });
+    });
+</script>

@@ -187,7 +187,7 @@ label {
 .download-icon,
 .view-link-icon,
 .edit-folder-icon,
-.edit-file-icon {
+.edit-file-icon, .details-icon, .close-options-list-icon {
   width: 20px;
   height: 20px;
 }
@@ -559,17 +559,37 @@ audio {
 .options {
   padding: .5rem;
   border-radius: var(--border-radius);
-  display: grid;
+  display: none;
   flex: none;
   position: relative;
 }
 
 .options-list {
   position: absolute;
-  padding: var(--padding);
   border-radius: var(--border-radius);
   z-index: 1;
   margin-bottom: 2rem;
+  box-shadow: var(--box-shadow);
+  background-color: #fff;
+  top: 100%;
+  right: 0;
+  transform: scale(0);
+  transform-origin: top right;
+  transition: transform 400ms ease 0ms;
+}
+
+.options-list{
+  & > *:not(:last-child) {
+    padding: 1rem 1rem 0rem 1rem;
+  }
+
+  & > *:last-child {
+    padding: 1rem;
+  }
+}
+
+.show-options-list {
+  transform: scale(1);
 }
 
 .options img {
@@ -602,7 +622,9 @@ audio {
   .dashboard {
     padding: var(--padding);
   }
+}
 
+@media (width <= 1200px) {
   .table-header > *:not(:first-child), 
   .table-row > *:not(:first-child, .options) {
     display: none !important;

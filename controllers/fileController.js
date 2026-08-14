@@ -271,16 +271,18 @@ async function uploadFile(req, res, next) {
     const data = matchedData(req);
     const folderId = data.folder_id ? parseInt(data.folder_id) : null;
 
-    if (folderId && !(await Folder.getFolder(folderId))) {
-      req.flash("error", "Invalid folder");
-      return res.redirect("/dashboard");
-    }
+    if(folderId) {
+      const folder = await Folder.getFolder(folderId);
 
-    const folder = await Folder.getFolder(folderId);
+      if (!folder) {
+        req.flash("error", "Invalid folder");
+        return res.redirect("/dashboard");
+      }
 
-    if(userId !== folder.user_id) {
-      req.flash("error", "You can't upload files to this folder");
-      return res.redirect("/dashboard");
+      if(userId !== folder.user_id) {
+        req.flash("error", "You can't upload files to this folder");
+        return res.redirect("/dashboard");
+      }
     }
 
     const mb = 1048576;
