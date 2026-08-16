@@ -40,8 +40,8 @@
                     </div>
                     <% } else if (element.type === "file") { %> 
                         <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">
-                        <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
-                        <button class="share-folder-button" onclick="shareFile(<%= element.file_id %>)">Share</button>
+                            <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
+                            <button class="share-folder-button" onclick="shareFile(<%= element.file_id %>)">Share</button>
                         </div>
                     <% } %>
                     <% if(element.share_link !== null) { %>
@@ -63,40 +63,40 @@
             <div class="options pointer grid-center">
                 <img src="https://img.icons8.com/?size=100&id=84119&format=png&color=000000" alt="more-options">
                 <div class="options-list box-shadow">
-                    <div style="display: flex; gap: .25rem; justify-content: flex-start; align-items: center;">
+                    <div class="download-file-button" style="display: flex; gap: .25rem; justify-content: flex-start; align-items: center;">
                         <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
-                        <button class="download-file-button share-folder-button">Download</button>
+                        <button class="share-folder-button">Download</button>
                     </div>
                     <% if(areDestructiveActionsEnabled) { %>
                     <% if(element.type === "folder") { %>
-                    <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                    <div class="share-button-wrapper" onclick="shareFolder(<%= element.folder_id %>)" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                       <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
-                      <button class="share-folder-button" onclick="shareFolder(<%= element.folder_id %>)">Share</button>
+                      <button class="share-folder-button">Share</button>
                     </div>
                     <% } else if (element.type === "file") { %> 
-                        <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        <div class="share-button-wrapper" onclick="shareFile(<%= element.file_id %>)" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                         <img src="https://img.icons8.com/?size=100&id=98959&format=png&color=1b71e1" alt="share-icon" class="share-folder-icon">
-                        <button class="share-folder-button" onclick="shareFile(<%= element.file_id %>)">Share</button>
+                        <button class="share-folder-button">Share</button>
                         </div>
                     <% } %>
                     <% if(element.share_link !== null) { %>
-                        <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
-                        <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
-                        <button onclick="viewShareLink(<%= JSON.stringify(element) %>)" class="view-link-button">Link</button>
+                        <div onclick="viewShareLink(<%= JSON.stringify(element) %>)" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                            <img src="https://img.icons8.com/?size=100&id=I7J76hq8WtC6&format=png&color=1b71e1" alt="link-icon" class="view-link-icon">
+                            <button class="view-link-button">Link</button>
                         </div>
                     <% } %>
-                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                    <a style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;" href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">
                         <img src="https://img.icons8.com/?size=100&id=59770&format=png&color=1b71e1" alt="edit-icon" class="edit-folder-icon">
-                        <a href="<%= element.type === 'folder' ? `/folder/update/${element.folder_id}` : `/file/update/${element.file_id}` %>" class="blue">Edit</a>
-                    </div>
-                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                        Edit
+                    </a>
+                    <a style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;" href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/delete/${element.file_id}` %>" class="delete">
                         <img src="https://img.icons8.com/?size=100&id=FgOBVsURv5ar&format=png&color=ff0000" alt="delete-folder-icon" class="delete-folder-icon">
-                        <a href="<%= element.type === 'folder' ? `/folder/delete/${element.folder_id}` : `/file/delete/${element.file_id}` %>" class="delete">Delete</a>
-                    </div>
+                        Delete
+                    </a>
                 <% } %>
-                    <div style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
+                    <div onclick="openResourceDetailsDialog(<%= JSON.stringify(element) %>)" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                         <img src="https://img.icons8.com/?size=100&id=utVqz5OlvGCj&format=png&color=1b71e1" alt="details-icon">
-                        <div class="blue" onclick="openResourceDetailsDialog(<%= JSON.stringify(element) %>)">Details</div>
+                        <div class="blue">Details</div>
                     </div>
                     <div class="close-options-list" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">
                         <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=ff0000" alt="close-options-list-icon">

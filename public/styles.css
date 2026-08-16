@@ -88,10 +88,6 @@ dialog::backdrop {
   border: 1px solid lightgray;
 }
 
-.table,
-.table-row {
-}
-
 .table-header {
   display: flex;
   background-color: rgb(237, 237, 237);
@@ -187,7 +183,10 @@ label {
 .download-icon,
 .view-link-icon,
 .edit-folder-icon,
-.edit-file-icon, .details-icon, .close-options-list-icon {
+.edit-file-icon,
+.details-icon,
+.close-options-list-icon,
+.hamburger-menu img {
   width: 20px;
   height: 20px;
 }
@@ -468,6 +467,11 @@ audio {
 .search-bar-form {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+
+  & input {
+    min-width: 0;
+  }
 }
 
 .search-icon {
@@ -557,7 +561,7 @@ audio {
 }
 
 .options {
-  padding: .5rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius);
   display: none;
   flex: none;
@@ -578,13 +582,17 @@ audio {
   transition: transform 400ms ease 0ms;
 }
 
-.options-list{
+.options-list {
   & > *:not(:last-child) {
     padding: 1rem 1rem 0rem 1rem;
   }
 
   & > *:last-child {
     padding: 1rem;
+  }
+
+  & > *:hover {
+    background-color: rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -604,14 +612,45 @@ audio {
 .resource-details:open {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .resource-details {
-  &  {
-    .resource-size, .resource-upload-date {
+  & {
+    .resource-size,
+    .resource-upload-date {
       font-weight: 500;
     }
+  }
+}
+
+.hamburger-menu {
+  display: none;
+  padding: 0.6rem;
+  border-radius: var(--border-radius);
+}
+
+.hamburger-menu:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.mobile-subheader {
+  padding: 0.75rem var(--padding);
+  border: 1px solid lightgray;
+  display: none;
+}
+
+.show-mobile-subheader {
+  display: block;
+}
+
+@media (width <= 400px) {
+  .hamburger-menu {
+    display: grid;
+  }
+
+  .login-info {
+    display: none !important;
   }
 }
 
@@ -629,6 +668,10 @@ audio {
   .file-preview-wrapper {
     max-width: none;
   }
+
+  .folder-name {
+    max-width: 15ch;
+  }
 }
 
 @media (width <= 700px) {
@@ -639,7 +682,7 @@ audio {
 }
 
 @media (width <= 1200px) {
-  .table-header > *:not(:first-child), 
+  .table-header > *:not(:first-child),
   .table-row > *:not(:first-child, .options) {
     display: none !important;
   }

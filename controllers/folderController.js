@@ -66,12 +66,13 @@ async function getAllFolderElements(req, res, next) {
       return res.redirect("/dashboard");
     }
 
-    const q = data.q;
+    const q = data.q?.toLowerCase();
     const folderElements = await Folder.getAllElements(folderId);
     const filteredFolderElements = q
       ? folderElements.filter(
           (element) =>
-            element.folder_name?.includes(q) || element.file_name?.includes(q),
+            element.folder_name?.toLowerCase().includes(q) ||
+            element.file_name?.toLowerCase().includes(q),
         )
       : folderElements;
     const source = q ? "search" : "none";

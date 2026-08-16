@@ -42,14 +42,13 @@ async function getDashboard(req, res, next) {
   try {
     const result = validationResult(req);
 
-    if(!result.isEmpty()) {
-      console.log("Entré aquí");
+    if (!result.isEmpty()) {
       req.flash("error", result.array());
       return res.redirect("/dashboard");
     }
 
     const data = matchedData(req);
-    const q = data.q;
+    const q = data.q?.toLowerCase();
 
     const userId = req.session.passport.user;
     const rootData = await Folder.getAllRootElements(userId);
@@ -57,7 +56,8 @@ async function getDashboard(req, res, next) {
     const filteredRootData = q
       ? rootData.rootElements.filter(
           (element) =>
-            element.file_name?.includes(q) || element.folder_name?.includes(q),
+            element.file_name?.toLowerCase().includes(q) ||
+            element.folder_name?.toLowerCase().includes(q),
         )
       : rootData.rootElements;
     const source = q ? "search" : "dashboard";

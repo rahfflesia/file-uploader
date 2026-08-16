@@ -1,9 +1,8 @@
 <header class="flex-between-row fu-header std-padding">
+  <% const fullName = locals.currentUser.first_name + ' ' + locals.currentUser.last_name %>
   <h2 style="font-weight: bolder" class="blue app-name pointer">FileUploader</h2>
-  <div style="display: flex; gap: 0.75rem; align-items: center">
+  <div style="display: flex; gap: 0.75rem; align-items: center" class="login-info">
     <% if(locals.currentUser) { %>
-      <% const fullName = locals.currentUser.first_name + ' ' +
-      locals.currentUser.last_name %>
       <span class="full-name"
       ><%= fullName %></span
       >
@@ -12,10 +11,32 @@
       <a href="/auth/log-in" class="logout">Log in</a>
     <% } %>
   </div>
+  <div class="hamburger-menu grid-center pointer" onclick="toggleMobileSubheader()">
+    <img src="https://img.icons8.com/?size=100&id=8113&format=png&color=000000" alt="menu-icon">
+  </div>
 </header>
+<div class="mobile-subheader">
+    <% if(locals.currentUser) { %>
+      <span class="full-name"><%= fullName %></span>
+      <a href="/auth/log-out" class="logout">Log out</a>
+    <% } else { %>
+      <a href="/auth/log-in" class="logout">Log in</a>
+    <% } %>
+</div>
 <script defer>
   const appName = document.querySelector(".app-name");
   appName.addEventListener("click", function () {
     window.location.href = "/dashboard";
+  });
+
+  const mobileSubheader = document.querySelector(".mobile-subheader");
+  function toggleMobileSubheader () {
+    mobileSubheader.classList.toggle("show-mobile-subheader");
+  }
+
+  window.addEventListener("resize", () => {
+    if(window.innerWidth > 400) {
+      mobileSubheader.classList.remove("show-mobile-subheader");
+    }
   });
 </script>

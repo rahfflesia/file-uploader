@@ -155,7 +155,7 @@
       const uploadFileModal = document.querySelector(".upload-file-dialog");
       const closeUploadDialogButton = document.querySelector(".close-upload-file-dialog");
 
-      const elementsArray = <%- JSON.stringify(elements) %>
+      const elementsArray = <%- JSON.stringify(elements.rootData) %>
       const downloadButtons = document.querySelectorAll(".download-file-button");
 
       closeLinkDialogButton.addEventListener('click', () => {
@@ -285,6 +285,7 @@
       for(let i = 0; i < downloadButtons.length; i++) {
         const downloadButton = downloadButtons[i];
         downloadButton.addEventListener('click', () => {
+          console.log("La descarga debería iniciar...");
           const element = elementsArray[i];
           switch(element.type) {
             case 'file':
@@ -298,6 +299,12 @@
           }
         });
       }
+
+      window.addEventListener("resize", () => {
+        if(window.innerWidth > 1200) {
+          resourceDetailsDialog.close();
+        }
+      });
     </script>
   </body>
 </html>
