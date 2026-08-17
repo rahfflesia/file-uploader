@@ -67,6 +67,8 @@ app.get("/dashboard", [isAuthenticated, ...dashboardValidators] , authController
 
 app.get("/not-found", (req, res) => res.render("./404"));
 
+app.get("/expired-link", (req, res) => res.render("./expiredLink"));
+
 // 404 error middleware handler
 app.use((req, res, next) => {
   res.redirect("/not-found");

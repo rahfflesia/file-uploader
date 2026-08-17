@@ -12,6 +12,7 @@
     <%- include("../partials/uploadFileModal") %>
     <%- include('../partials/header') %>
     <%- include("../partials/createFolderModal") %>
+    <%- include("../partials/details") %>
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>
@@ -68,14 +69,14 @@
     </dialog>
     <main class="flex-column flex-1 std-padding dashboard">
       <div class="flex-between-row sm-mb">
-        <h2><span class="blue"><%= folder.folder_name %></span> <span>content</span></h2>
-        <div>
+        <h2><span class="blue word-break"><%= folder.folder_name %></span> <span>content</span></h2>
+      </div>
+      <div class="actions-buttons-subheader sm-mb">
           <button class="regular-button create-folder-button">Create new folder</button>
           <button class="upload-file-button regular-button">Upload file</button>
-        </div>
       </div>
       <div class="sm-mb">
-        <h3 style="display: flex; gap: .25rem;">
+        <h3 style="display: flex; gap: .25rem; flex-wrap: wrap;" class="word-break">
           <span>Path</span>
           <div style="display: flex;">
             <a href="/dashboard" class="blue">/</a>
@@ -236,5 +237,44 @@
         }
       });
     }
+
+    const resourceDetailsDialog = document.querySelector(".resource-details");
+    const closeResourceDetailsDialogButton = document.querySelector(".close-resource-details-dialog");
+
+    closeResourceDetailsDialogButton.addEventListener("click", () => {
+        resourceDetailsDialog.close();
+    });
+
+    function openResourceDetailsDialog(element) {
+        console.log(element);
+        const resourceName = document.querySelector(".resource-name");
+        const headerDetails = document.querySelector(".header-details");
+        const resourceSize = document.querySelector(".resource-size");
+        const resourceUploadDate = document.querySelector(".resource-upload-date");
+
+        const capitalizedType = element.type.charAt(0).toUpperCase() + element.type.slice(1);
+        headerDetails.textContent = `${capitalizedType} details`;
+
+        switch(element.type) {
+          case "file":
+            resourceName.textContent = "Name: " + element.file_name;
+            resourceSize.textContent = "Size: " + element.size;
+
+            const uploadDate = new Date(element.uploaded_at);
+            resourceUploadDate.textContent = "Upload date: " + uploadDate.toLocaleString("es-MX");
+            break;
+          case "folder":
+            resourceName.textContent = "Name: " + element.folder_name;
+            resourceSize.textContent = element.size === "0 B" ? "This folder is empty" : "Size: " + element.size;
+
+            const lastUploadDate = new Date(element.last_used);
+            resourceUploadDate.textContent = "Last upload (or creation date if a file has never been uploaded): " + lastUploadDate.toLocaleString("es-MX");
+            break;
+          default:
+            console.error("This type of resource is not supported");
+        }
+
+        resourceDetailsDialog.showModal();
+      }
   </script>
 </html>

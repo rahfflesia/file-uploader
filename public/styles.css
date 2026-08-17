@@ -421,11 +421,6 @@ label {
   box-shadow: var(--box-shadow);
   border-radius: var(--border-radius);
   padding: var(--padding);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
   margin: 2rem;
 }
 
@@ -449,11 +444,7 @@ audio {
   object-fit: cover;
 }
 
-.file-preview-wrapper:has(img) {
-  max-width: 400px;
-}
-
-.file-preview-wrapper:has(video) {
+.file-preview-wrapper {
   max-width: 500px;
 }
 
@@ -642,6 +633,10 @@ audio {
 
 .show-mobile-subheader {
   display: block;
+}
+
+.word-break {
+  word-break: break-word;
 }
 
 @media (width <= 400px) {
