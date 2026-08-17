@@ -233,8 +233,8 @@ label {
 }
 
 .close-icon img {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
 }
 
 .actions {
@@ -320,7 +320,7 @@ label {
   border-radius: var(--border-radius);
   padding: 0.5rem;
   border: none;
-  min-width: 300px;
+  min-width: 250px;
 }
 
 .toast {

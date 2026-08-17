@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="/dashboard/dashboard.css">
   </head>
   <body class="mh-100dvh flex-column">
-    <dialog class="link-dialog">
+    <dialog class="link-dialog" style="min-width: 275px;">
       <div class="link-dialog-wrapper">
-        <div class="flex-between-row">
+        <div class="flex-between-row" style="flex-wrap: nowrap; gap: 1rem;">
           <h2></h2>
           <div class="close-link-dialog close-icon grid-center">
             <img src="https://img.icons8.com/?size=100&id=8112&format=png&color=000000" alt="close-icon">
@@ -254,7 +254,7 @@
         const linkDialog = document.querySelector(".link-dialog");
         const h2 = document.querySelector(".link-dialog h2");
         const linkAnchor = document.querySelector(".folder-link");
-        h2.textContent = `Share ${element.type === "folder" ? element.folder_name : element.file_name} with the following link`;
+        h2.textContent = `Share this ${element.type} with the following link`;
         linkAnchor.href = element.share_link;
         linkAnchor.textContent = element.share_link;
         linkDialog.showModal();
