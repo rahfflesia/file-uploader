@@ -62,4 +62,6 @@ folder.get(
   folderController.getUpdateFolderView,
 );
 
+folder.get("/download/:folder_id", folderController.downloadFolder);
+
 module.exports = folder;

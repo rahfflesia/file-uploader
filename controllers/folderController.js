@@ -3,6 +3,7 @@ const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
 const File = require("../models/File");
 const User = require("../models/User");
+const fs = require("node:fs/promises");
 
 const dashboardRoute = "/dashboard";
 
@@ -369,6 +370,19 @@ async function updateFolderName(req, res, next) {
   }
 }
 
+async function downloadFolder(req, res, next) {
+  try {
+    const folderId = req.params.folder_id;
+    const folder = await Folder.getFolder(folderId);
+
+    const rootFolder = await fs.mkdir(folder.folder_name);
+
+    res.send("<p>Carpeta creada</p>");
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createFolder,
   getAllFolderElements,
@@ -377,4 +391,5 @@ module.exports = {
   getSharedFolder,
   updateFolderName,
   getUpdateFolderView,
+  downloadFolder,
 };

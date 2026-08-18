@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FileUploader</title>
     <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/dashboard/dashboard.css">
   </head>
   <body class="mh-100dvh flex-column">
     <dialog class="link-dialog" style="min-width: 275px;">
@@ -156,7 +155,7 @@
       const closeUploadDialogButton = document.querySelector(".close-upload-file-dialog");
 
       const elementsArray = <%- JSON.stringify(elements.rootData) %>
-      const downloadButtons = document.querySelectorAll(".download-file-button");
+      const downloadButtons = document.querySelectorAll(".download-button-desktop");
 
       closeLinkDialogButton.addEventListener('click', () => {
         linkDialog.close();
@@ -194,7 +193,6 @@
       });
 
       function openResourceDetailsDialog(element) {
-        console.log(element);
         const resourceName = document.querySelector(".resource-name");
         const headerDetails = document.querySelector(".header-details");
         const resourceSize = document.querySelector(".resource-size");
@@ -284,15 +282,14 @@
 
       for(let i = 0; i < downloadButtons.length; i++) {
         const downloadButton = downloadButtons[i];
-        downloadButton.addEventListener('click', () => {
-          console.log("La descarga debería iniciar...");
+        downloadButton.addEventListener('click', async () => {
           const element = elementsArray[i];
           switch(element.type) {
             case 'file':
               download(element);
               break;
             case 'folder':
-              recurse(element);
+              await fetch(`/folder/download/${element.folder_id}`);
               break;
             default:
               console.error("Invalid type");
