@@ -5,10 +5,11 @@ const { convertBytes, isSharedFile } = require("../helpers/helpers");
 const prisma = require("../lib/prisma");
 const { validationResult, matchedData } = require("express-validator");
 
+const dashboardRoute = "/dashboard";
+
 async function deleteFile(req, res, next) {
   try {
     const result = validationResult(req);
-    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
@@ -26,7 +27,7 @@ async function deleteFile(req, res, next) {
       return res.redirect(dashboardRoute);
     }
 
-    if(userId !== file.user_id) {
+    if (userId !== file.user_id) {
       req.flash("error", "You don't have the permissions to delete this file");
       return res.redirect();
     }
@@ -55,7 +56,7 @@ async function getFileDetails(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -66,12 +67,12 @@ async function getFileDetails(req, res, next) {
 
     if (!file) {
       req.flash("error", "No file was found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
-    if(userId !== file.user_id) {
+    if (userId !== file.user_id) {
       req.flash("error", "You don't have the permissions to view this file");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const formatedFile = {
@@ -91,7 +92,7 @@ async function getUpdateFileNameView(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -101,12 +102,12 @@ async function getUpdateFileNameView(req, res, next) {
 
     if (!file) {
       req.flash("error", "No folder was found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
-    if(userId !== file.user_id) {
+    if (userId !== file.user_id) {
       req.flash("error", "You don't have the permissions to view this file");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     res.status(200).render("./files/updateFileName", { file: file });
@@ -118,7 +119,6 @@ async function getUpdateFileNameView(req, res, next) {
 async function updateFileName(req, res, next) {
   try {
     const result = validationResult(req);
-    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
       const errors = result.array();
@@ -138,8 +138,11 @@ async function updateFileName(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      if(userId !== file.user_id) {
-        req.flash("error", "You don't have the permissions to update this file");
+      if (userId !== file.user_id) {
+        req.flash(
+          "error",
+          "You don't have the permissions to update this file",
+        );
         return res.redirect(dashboardRoute);
       }
 
@@ -163,7 +166,6 @@ async function updateFileName(req, res, next) {
 async function shareFile(req, res, next) {
   try {
     const result = validationResult(req);
-    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
       const errors = result.array();
@@ -183,7 +185,7 @@ async function shareFile(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      if(userId !== file.user_id) {
+      if (userId !== file.user_id) {
         req.flash("error", "You can't share this file");
         return res.redirect(dashboardRoute);
       }
@@ -260,28 +262,28 @@ async function uploadFile(req, res, next) {
 
     if (!req.file || req.file.buffer.length < 1) {
       req.flash("error", "You are trying to upload an empty file");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     if (!r.isEmpty()) {
       req.flash("error", r.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
     const folderId = data.folder_id ? parseInt(data.folder_id) : null;
 
-    if(folderId) {
+    if (folderId) {
       const folder = await Folder.getFolder(folderId);
 
       if (!folder) {
         req.flash("error", "Invalid folder");
-        return res.redirect("/dashboard");
+        return res.redirect(dashboardRoute);
       }
 
-      if(userId !== folder.user_id) {
+      if (userId !== folder.user_id) {
         req.flash("error", "You can't upload files to this folder");
-        return res.redirect("/dashboard");
+        return res.redirect(dashboardRoute);
       }
     }
 
@@ -297,7 +299,7 @@ async function uploadFile(req, res, next) {
         "The file is too large (100 MB Max for video and 10 MB for other type of files)",
       );
       return res.redirect(
-        folderId ? `/folder/files/${folderId}` : "/dashboard",
+        folderId ? `/folder/files/${folderId}` : dashboardRoute,
       );
     }
 
@@ -333,7 +335,7 @@ async function uploadFile(req, res, next) {
 
     if (folderId === null) {
       req.flash("success", "File uploaded successfully");
-      return res.status(201).redirect("/dashboard");
+      return res.status(201).redirect(dashboardRoute);
     }
 
     req.flash("success", "File uploaded successfully");

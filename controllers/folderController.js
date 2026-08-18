@@ -3,6 +3,8 @@ const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
 
+const dashboardRoute = "/dashboard";
+
 async function createFolder(req, res, next) {
   try {
     const result = validationResult(req);
@@ -14,7 +16,7 @@ async function createFolder(req, res, next) {
       req.flash("error", result.array());
 
       if (!parentFolderId) {
-        return res.redirect("/dashboard");
+        return res.redirect(dashboardRoute);
       } else {
         return res.redirect(`/folder/files/${parentFolderId}`);
       }
@@ -32,7 +34,7 @@ async function createFolder(req, res, next) {
 
     if (parentFolderId === null) {
       req.flash("success", "Folder created successfully");
-      return res.status(201).redirect("/dashboard");
+      return res.status(201).redirect(dashboardRoute);
     }
 
     req.flash("success", "Folder created successfully");
@@ -48,7 +50,7 @@ async function getAllFolderElements(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -58,12 +60,12 @@ async function getAllFolderElements(req, res, next) {
 
     if (!folderData) {
       req.flash("error", "No folder found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     if (folderData.user_id !== userId) {
       req.flash("error", "You don't have access to this resource");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const q = data.q?.toLowerCase();
@@ -113,7 +115,7 @@ async function deleteFolder(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -123,12 +125,12 @@ async function deleteFolder(req, res, next) {
 
     if (!folder) {
       req.flash("error", "No folder found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     if (folder.user_id !== userId) {
       req.flash("error", "You don't have access to this resource");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const deletedFolder = await Folder.deleteFolder(folderId);
@@ -136,7 +138,7 @@ async function deleteFolder(req, res, next) {
 
     if (parentFolderId === null) {
       req.flash("success", "Folder deleted successfully");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     req.flash("success", "Folder deleted successfully");
@@ -151,7 +153,6 @@ async function deleteFolder(req, res, next) {
 async function shareFolder(req, res, next) {
   try {
     const result = validationResult(req);
-    const dashboardRoute = "/dashboard";
 
     if (!result.isEmpty()) {
       const errors = result.array();
@@ -252,7 +253,7 @@ async function getSharedFolder(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -263,7 +264,7 @@ async function getSharedFolder(req, res, next) {
 
     if (!sharedFolder && !sharedFile) {
       req.flash("error", "No resource was found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const isFolder = sharedFolder !== null && sharedFile === null;
@@ -330,7 +331,7 @@ async function getUpdateFolderView(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const reqData = matchedData(req);
@@ -339,12 +340,12 @@ async function getUpdateFolderView(req, res, next) {
 
     if (!folder) {
       req.flash("error", "No folder was found");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     if (userId !== folder.user_id) {
       req.flash("error", "You don't have access to this folder");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = {
@@ -375,7 +376,7 @@ async function updateFolderName(req, res, next) {
         return res.redirect(`/folder/update/${folderId}`);
       }
 
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
@@ -384,14 +385,14 @@ async function updateFolderName(req, res, next) {
 
     if (userId !== folder.user_id) {
       req.error("error", "You cannot update this folder");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const updatedFolder = await Folder.updateFolderName(data);
 
     if (updatedFolder.parent_folder_id === null) {
       req.flash("success", "Folder updated successfully");
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     req.flash("success", "Folder updated successfully");

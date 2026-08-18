@@ -3,6 +3,8 @@ const User = require("../models/User");
 const Folder = require("../models/Folder");
 const { validationResult, matchedData } = require("express-validator");
 
+const dashboardRoute = "/dashboard";
+
 async function getLogin(req, res) {
   res.status(200).render("./auth/login");
 }
@@ -44,7 +46,7 @@ async function getDashboard(req, res, next) {
 
     if (!result.isEmpty()) {
       req.flash("error", result.array());
-      return res.redirect("/dashboard");
+      return res.redirect(dashboardRoute);
     }
 
     const data = matchedData(req);
