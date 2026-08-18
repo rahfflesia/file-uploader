@@ -311,6 +311,38 @@ class Folder {
 
     return sharedFile;
   }
+
+  static async getFolderHistory(folderId) {
+    const folderHistory = await prisma.shared_folders.findMany({
+      where: {
+        folder_id: parseInt(reqData.folder_id),
+      },
+      include: {
+        folders: {
+          select: {
+            parent_folder_id: true,
+          },
+        },
+      },
+    });
+
+    return folderHistory;
+  }
+
+  static async shareFolder(data) {
+    const sharedFolder = await prisma.shared_folders.create({
+      data: data,
+      include: {
+        folders: {
+          select: {
+            parent_folder_id: true,
+          },
+        },
+      },
+    });
+
+    return sharedFolder;
+  }
 }
 
 module.exports = Folder;

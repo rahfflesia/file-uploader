@@ -2,7 +2,6 @@ const File = require("../models/File");
 const Folder = require("../models/Folder");
 const cloudinary = require("cloudinary").v2;
 const { convertBytes, isSharedFile } = require("../helpers/helpers");
-const prisma = require("../lib/prisma");
 const { validationResult, matchedData } = require("express-validator");
 
 const dashboardRoute = "/dashboard";
@@ -196,19 +195,8 @@ async function shareFile(req, res, next) {
     }
 
     const reqData = matchedData(req);
-    const fileId = parseInt(reqData.file_id);
-    const fileHistory = await prisma.shared_files.findMany({
-      where: {
-        file_id: fileId,
-      },
-      include: {
-        files: {
-          select: {
-            folder_id: true,
-          },
-        },
-      },
-    });
+    const fileId = reqData.file_id;
+    const fileHistory = await File.getSharedFileHistory(fileId);
 
     if (isSharedFile(fileHistory)) {
       const fileData = fileHistory[0];
@@ -232,16 +220,7 @@ async function shareFile(req, res, next) {
       expires_at: expirationDate,
     };
 
-    const sharedFile = await prisma.shared_files.create({
-      data: data,
-      include: {
-        files: {
-          select: {
-            folder_id: true,
-          },
-        },
-      },
-    });
+    const sharedFile = await File.shareFile(data);
 
     if (sharedFile.files.folder_id === null) {
       req.flash("success", "File shared successfully");
@@ -329,9 +308,7 @@ async function uploadFile(req, res, next) {
       user_id: userId,
     };
 
-    await prisma.files.create({
-      data: fileData,
-    });
+    await File.createFile(fileData);
 
     if (folderId === null) {
       req.flash("success", "File uploaded successfully");

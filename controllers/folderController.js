@@ -1,7 +1,8 @@
-const prisma = require("../lib/prisma");
 const Folder = require("../models/Folder");
 const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
+const File = require("../models/File");
+const User = require("../models/User");
 
 const dashboardRoute = "/dashboard";
 
@@ -185,18 +186,7 @@ async function shareFolder(req, res, next) {
 
     const reqData = matchedData(req);
 
-    const folderHistory = await prisma.shared_folders.findMany({
-      where: {
-        folder_id: parseInt(reqData.folder_id),
-      },
-      include: {
-        folders: {
-          select: {
-            parent_folder_id: true,
-          },
-        },
-      },
-    });
+    const folderHistory = await Folder.getFolderHistory(reqData.folder_id)
 
     const folderData = folderHistory[0];
 
@@ -224,16 +214,7 @@ async function shareFolder(req, res, next) {
       expires_at: expirationDate,
     };
 
-    const sharedFolder = await prisma.shared_folders.create({
-      data: data,
-      include: {
-        folders: {
-          select: {
-            parent_folder_id: true,
-          },
-        },
-      },
-    });
+    const sharedFolder = await Folder.shareFolder(data);
 
     if (sharedFolder.folders.parent_folder_id === null) {
       req.flash("success", "Folder shared successfully");
@@ -268,22 +249,12 @@ async function getSharedFolder(req, res, next) {
     }
 
     const isFolder = sharedFolder !== null && sharedFile === null;
-
-    const owner = await prisma.users.findUnique({
-      where: {
-        user_id: isFolder ? sharedFolder.user_id : sharedFile.user_id,
-      },
-      select: {
-        first_name: true,
-        last_name: true,
-      },
-    });
-
+    const owner = await User.getResourceOwner(isFolder);
     const ownerFullName = owner.first_name + " " + owner.last_name;
 
     if (isFolder) {
       if (Date.now() > sharedFolder.expires_at.getTime()) {
-        return res.status(410).render("expiredLink");
+        return res.redirect("/expired-link");
       }
 
       const rootData = await Folder.getAllElements(sharedFolder.folder_id);
@@ -298,14 +269,10 @@ async function getSharedFolder(req, res, next) {
       });
     } else if (!isFolder) {
       if (Date.now() > sharedFile.expires_at.getTime()) {
-        return res.status(410).render("expiredLink");
+        return res.redirect("/expired-link");
       }
-
-      const file = await prisma.files.findUnique({
-        where: {
-          file_id: sharedFile.file_id,
-        },
-      });
+      
+      const file = await File.getFileDetails(sharedFile.file_id);
 
       const formattedFile = {
         ...file,

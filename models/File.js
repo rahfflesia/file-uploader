@@ -1,6 +1,12 @@
 const prisma = require("../lib/prisma");
 
 class File {
+  static async createFile(data) {
+    await prisma.files.create({
+      data: data,
+    });
+  }
+
   static async deleteFile(fileId) {
     const deletedFile = await prisma.files.delete({
       where: {
@@ -31,7 +37,37 @@ class File {
     return updatedFile;
   }
 
-  static async shareFile() {}
+  static async getSharedFileHistory(fileId) {
+    const fileHistory = await prisma.shared_files.findMany({
+      where: {
+        file_id: parseInt(fileId)
+      },
+      include: {
+        files: {
+          select: {
+            folder_id: true,
+          }
+        }
+      }
+    });
+
+    return fileHistory;
+  }
+
+  static async shareFile(fileData) {
+    const sharedFile = await prisma.shared_files.create({
+      data: fileData,
+      include: {
+        files: {
+          select: {
+            folder_id: true,
+          },
+        },
+      },
+    });
+
+    return sharedFile;
+  }
 
   static async getSharedFiles(userId) {}
 }
