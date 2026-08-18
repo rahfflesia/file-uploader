@@ -11,7 +11,7 @@
     <main class="std-padding flex-column" style="flex: 1">
       <% if(type === "folder") { %>
         <h2 class="sm-mb"><%= owner %> shared this folder with you</h2>
-        <% if(elements.length > 0) { %>
+        <% if(elements.rootData.length > 0) { %>
           <%- include("../partials/table") %>
         <% } else { %>
           <div>This folder has no files</div>
@@ -57,6 +57,8 @@
     const downloadButtons = document.querySelectorAll(".download-file-button");
     const elementType = <%- JSON.stringify(type) %>
     const elementsObj = <%- JSON.stringify(elements) %>
+
+    console.log(elementsObj);
 
     function download(file) {
         fetch(file.url).then((response) => response.blob()).then((blob) => {

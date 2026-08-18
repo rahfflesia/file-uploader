@@ -211,7 +211,7 @@ async function shareFolder(req, res, next) {
       );
     }
 
-    const expirationDays = parseInt(data.expiration_days);
+    const expirationDays = parseInt(reqData.expiration_days);
     const milisecondsPerDay = 24 * 60 * 60 * 1000;
     const expirationTimeMiliseconds =
       Date.now() + expirationDays * milisecondsPerDay;
@@ -219,7 +219,7 @@ async function shareFolder(req, res, next) {
 
     const data = {
       user_id: req.session.passport.user,
-      folder_id: parseInt(data.folder_id),
+      folder_id: parseInt(reqData.folder_id),
       expires_at: expirationDate,
     };
 
@@ -285,10 +285,12 @@ async function getSharedFolder(req, res, next) {
         return res.status(410).render("expiredLink");
       }
 
-      const elements = await Folder.getAllElements(sharedFolder.folder_id);
+      const rootData = await Folder.getAllElements(sharedFolder.folder_id);
 
       return res.status(200).render("./folders/sharedFolder", {
-        elements: elements,
+        elements: {
+          rootData: rootData,
+        },
         type: "folder",
         areDestructiveActionsEnabled: false,
         owner: ownerFullName,

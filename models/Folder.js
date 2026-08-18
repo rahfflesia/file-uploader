@@ -284,7 +284,7 @@ class Folder {
           size: convertBytes(size),
           share_link:
             linkUUID !== null
-              ? `http://localhost:8080/folder/share/${linkUUID}`
+              ? `http://192.168.100.8:8080/folder/share/${linkUUID}`
               : linkUUID,
         };
       }),

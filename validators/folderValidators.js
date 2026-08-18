@@ -76,7 +76,7 @@ function validateDeleteFolder() {
 
 function validateShareFolder() {
   return [
-    body("expirations_days")
+    body("expiration_days")
       .isInt({ min: 1, max: 30 })
       .withMessage("Invalid expiration days")
       .bail()

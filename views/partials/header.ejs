@@ -1,5 +1,5 @@
 <header class="flex-between-row fu-header std-padding">
-  <% const fullName = locals.currentUser.first_name + ' ' + locals.currentUser.last_name %>
+  <% const fullName = `${locals.currentUser?.first_name ?? ''} ${locals.currentUser?.last_name ?? ''}` %>
   <h2 style="font-weight: bolder" class="blue app-name pointer">FileUploader</h2>
   <div style="display: flex; gap: 0.75rem; align-items: center" class="login-info">
     <% if(locals.currentUser) { %>
