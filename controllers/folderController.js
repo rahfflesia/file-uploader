@@ -3,7 +3,11 @@ const { convertBytes, isSharedFolder } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
 const File = require("../models/File");
 const User = require("../models/User");
-const fs = require("node:fs/promises");
+const { mkdir } = require("node:fs/promises");
+const https = require("https");
+const fs = require("fs");
+const { Readable } = require('stream');
+const { finished } = require('stream/promises');
 
 const dashboardRoute = "/dashboard";
 
@@ -372,12 +376,41 @@ async function updateFolderName(req, res, next) {
 
 async function downloadFolder(req, res, next) {
   try {
-    const folderId = req.params.folder_id;
-    const folder = await Folder.getFolder(folderId);
+    const folderId = parseInt(req.params.folder_id);
 
-    const rootFolder = await fs.mkdir(folder.folder_name);
+    async function recreateFolder(folderId) {
+      const folderData = await Folder.getFolder(folderId);
+      const elements = await Folder.getAllElements(folderId);
 
-    res.send("<p>Carpeta creada</p>");
+      const files = elements.filter((resource) => resource.type === "file");
+      const folders = elements.filter((resource) => resource.type === "folder");
+
+      console.log("Estoy en el folder", folderData.folder_name);
+      console.log("Contiene los siguientes archivos", files);
+      console.log("Contiene las siguientes carpetas", folders);
+
+      if(files.length === 0 && folders.length === 0) {
+        return;
+      }
+
+      for(const file of files) {
+        try {
+          const stream = fs.createWriteStream(file.file_name);
+          const { body } = await fetch(file.url);
+          await finished(Readable.fromWeb(body).pipe(stream));
+        } catch (err) {
+          next(err);
+        }
+      }
+
+      for(const folder of folders) {
+        recreateFolder(folder.folder_id);
+      }
+    }
+    
+    await recreateFolder(folderId);
+    res.send("Hola");
+
   } catch (err) {
     next(err);
   }
