@@ -6,10 +6,43 @@ const User = require("../models/User");
 const { mkdir } = require("node:fs/promises");
 const https = require("https");
 const fs = require("fs");
-const { Readable } = require('stream');
-const { finished } = require('stream/promises');
+const { Readable } = require("stream");
+const { finished } = require("stream/promises");
+const { zip } = require("zip-a-folder");
 
 const dashboardRoute = "/dashboard";
+
+// Function to recreate the folder structure when downloading a folder it is not a controller
+async function recreateFolder(folderId, path) {
+  const folderData = await Folder.getFolder(folderId);
+  const elements = await Folder.getAllElements(folderId);
+
+  let currentPath = path;
+  currentPath += `${folderData.folder_name}/`;
+
+  await mkdir(currentPath);
+
+  const files = elements.filter((resource) => resource.type === "file");
+  const folders = elements.filter((resource) => resource.type === "folder");
+
+  if (files.length === 0 && folders.length === 0) {
+    return;
+  }
+
+  for (const file of files) {
+    try {
+      const stream = fs.createWriteStream(`${currentPath}${file.file_name}`);
+      const { body } = await fetch(file.url);
+      await finished(Readable.fromWeb(body).pipe(stream));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  for (const folder of folders) {
+    await recreateFolder(folder.folder_id, currentPath);
+  }
+}
 
 async function createFolder(req, res, next) {
   try {
@@ -191,7 +224,7 @@ async function shareFolder(req, res, next) {
 
     const reqData = matchedData(req);
 
-    const folderHistory = await Folder.getFolderHistory(reqData.folder_id)
+    const folderHistory = await Folder.getFolderHistory(reqData.folder_id);
 
     const folderData = folderHistory[0];
 
@@ -276,7 +309,7 @@ async function getSharedFolder(req, res, next) {
       if (Date.now() > sharedFile.expires_at.getTime()) {
         return res.redirect("/expired-link");
       }
-      
+
       const file = await File.getFileDetails(sharedFile.file_id);
 
       const formattedFile = {
@@ -377,47 +410,21 @@ async function updateFolderName(req, res, next) {
 async function downloadFolder(req, res, next) {
   try {
     const folderId = parseInt(req.params.folder_id);
+    const folder = await Folder.getFolder(folderId);
+    const folderName = folder.folder_name;
 
-    async function recreateFolder(folderId, path) {
-      const folderData = await Folder.getFolder(folderId);
-      const elements = await Folder.getAllElements(folderId);
-
-      let currentPath = path;
-      currentPath += `${folderData.folder_name}/`;
-
-      await mkdir(currentPath);
-
-      const files = elements.filter((resource) => resource.type === "file");
-      const folders = elements.filter((resource) => resource.type === "folder");
-
-      console.log("Path actual", currentPath);
-
-      console.log("Estoy en el folder", folderData.folder_name);
-      console.log("Contiene los siguientes archivos", files);
-      console.log("Contiene las siguientes carpetas", folders);
-
-      if(files.length === 0 && folders.length === 0) {
-        return;
-      }
-
-      for(const file of files) {
-        try {
-          const stream = fs.createWriteStream(`${currentPath}${file.file_name}`);
-          const { body } = await fetch(file.url);
-          await finished(Readable.fromWeb(body).pipe(stream));
-        } catch (err) {
-          next(err);
-        }
-      }
-
-      for(const folder of folders) {
-        recreateFolder(folder.folder_id, currentPath);
-      }
-    }
-    
     await recreateFolder(folderId, "./");
-    res.send("Hola");
+    await zip(`./${folderName}`, `./${folderName}.zip`, {
+      destPath: `${folderName}/`,
+    });
 
+    res.download(`./${folderName}.zip`, (err) => {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
+      console.log("Aquí debería de borrar el folder");
+    });
   } catch (err) {
     next(err);
   }
