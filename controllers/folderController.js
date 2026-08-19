@@ -378,12 +378,19 @@ async function downloadFolder(req, res, next) {
   try {
     const folderId = parseInt(req.params.folder_id);
 
-    async function recreateFolder(folderId) {
+    async function recreateFolder(folderId, path) {
       const folderData = await Folder.getFolder(folderId);
       const elements = await Folder.getAllElements(folderId);
 
+      let currentPath = path;
+      currentPath += `${folderData.folder_name}/`;
+
+      await mkdir(currentPath);
+
       const files = elements.filter((resource) => resource.type === "file");
       const folders = elements.filter((resource) => resource.type === "folder");
+
+      console.log("Path actual", currentPath);
 
       console.log("Estoy en el folder", folderData.folder_name);
       console.log("Contiene los siguientes archivos", files);
@@ -395,7 +402,7 @@ async function downloadFolder(req, res, next) {
 
       for(const file of files) {
         try {
-          const stream = fs.createWriteStream(file.file_name);
+          const stream = fs.createWriteStream(`${currentPath}${file.file_name}`);
           const { body } = await fetch(file.url);
           await finished(Readable.fromWeb(body).pipe(stream));
         } catch (err) {
@@ -404,11 +411,11 @@ async function downloadFolder(req, res, next) {
       }
 
       for(const folder of folders) {
-        recreateFolder(folder.folder_id);
+        recreateFolder(folder.folder_id, currentPath);
       }
     }
     
-    await recreateFolder(folderId);
+    await recreateFolder(folderId, "./");
     res.send("Hola");
 
   } catch (err) {
