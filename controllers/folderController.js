@@ -9,25 +9,26 @@ const fs = require("fs");
 const { Readable } = require("stream");
 const { finished } = require("stream/promises");
 const { zip } = require("zip-a-folder");
+const { randomUUID } = require("node:crypto");
+const { rm } = require("node:fs");
 
 const dashboardRoute = "/dashboard";
 
 // Function to recreate the folder structure when downloading a folder it is not a controller
-async function recreateFolder(folderId, path) {
+async function recreateFolder(folderId, path, uuid) {
   const folderData = await Folder.getFolder(folderId);
   const elements = await Folder.getAllElements(folderId);
 
-  let currentPath = path;
-  currentPath += `${folderData.folder_name}/`;
+  let currentPath = uuid !== null ? `${uuid}/` : path;
+
+  if(uuid === null) {
+    currentPath += `${folderData.folder_name}/`;
+  }
 
   await mkdir(currentPath);
 
   const files = elements.filter((resource) => resource.type === "file");
   const folders = elements.filter((resource) => resource.type === "folder");
-
-  if (files.length === 0 && folders.length === 0) {
-    return;
-  }
 
   for (const file of files) {
     try {
@@ -40,7 +41,7 @@ async function recreateFolder(folderId, path) {
   }
 
   for (const folder of folders) {
-    await recreateFolder(folder.folder_id, currentPath);
+    await recreateFolder(folder.folder_id, currentPath, null);
   }
 }
 
@@ -413,17 +414,30 @@ async function downloadFolder(req, res, next) {
     const folder = await Folder.getFolder(folderId);
     const folderName = folder.folder_name;
 
-    await recreateFolder(folderId, "./");
-    await zip(`./${folderName}`, `./${folderName}.zip`, {
-      destPath: `${folderName}/`,
-    });
+    const uuid = randomUUID();
+    await recreateFolder(folderId, "./", uuid);
+    await zip(`./${uuid}`, `./${uuid}.zip`);
 
-    res.download(`./${folderName}.zip`, (err) => {
+    res.download(`./${uuid}.zip`, async (err) => {
       if (err) {
         console.error(err);
         throw err;
       }
-      console.log("Aquí debería de borrar el folder");
+      
+      // Delete folders after the download
+      rm(`./${uuid}`, { recursive: true } , (err) => {
+        if(err) {
+          console.error(err);
+          return;
+        }
+      });
+
+      rm(`./${uuid}.zip`, { recursive: false } , (err) => {
+        if(err) {
+          console.error(err);
+          return;
+        }
+      });
     });
   } catch (err) {
     next(err);
