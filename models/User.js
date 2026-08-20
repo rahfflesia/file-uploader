@@ -25,7 +25,7 @@ class User {
     return user;
   }
 
-  static async getResourceOwner(isFolder) {
+  static async getResourceOwner(isFolder, sharedFolder, sharedFile) {
     const owner = await prisma.users.findUnique({
       where: {
         user_id: isFolder ? sharedFolder.user_id : sharedFile.user_id,

@@ -14,6 +14,8 @@ const {
 
 const fileController = require("../controllers/fileController");
 
+file.get("/shared/download/:uuid", fileController.downloadSharedFile); 
+
 file.use(isAuthenticated);
 
 cloudinary.config({

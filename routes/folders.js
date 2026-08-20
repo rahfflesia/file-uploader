@@ -13,7 +13,6 @@ const {
 } = require("../validators/folderValidators");
 
 const folderController = require("../controllers/folderController");
-const Folder = require("../models/Folder");
 
 // Aquí tengo que ver bien porque al redirigir a dashboard se pierde el mensaje de error
 const getSharedFolderValidators = validateGetSharedFolder();
@@ -22,6 +21,8 @@ folder.get(
   [...getSharedFolderValidators],
   folderController.getSharedFolder,
 );
+
+folder.get("/shared/download/:uuid", folderController.downloadSharedFolder);
 
 folder.use(isAuthenticated);
 

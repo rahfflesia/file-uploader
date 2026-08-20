@@ -221,7 +221,7 @@ async function shareFile(req, res, next) {
 
     const data = {
       user_id: req.session.passport.user,
-      file_id: fileId,
+      file_id: parseInt(fileId),
       expires_at: expirationDate,
     };
 
@@ -336,12 +336,18 @@ async function downloadFile(req, res, next) {
       return res.redirect(dashboardRoute);
     }
 
+    const userId = req.session.passport.user;
     const data = matchedData(req);
     const fileId = data.file_id;
     const file = await File.getFileDetails(fileId);
 
     if (!file) {
       req.flash("error", "No file was found");
+      return res.redirect(dashboardRoute);
+    }
+
+    if(userId !== file.user_id) {
+      req.flash("error", "You don't have permissions to download this file");
       return res.redirect(dashboardRoute);
     }
 
@@ -381,6 +387,17 @@ async function downloadFile(req, res, next) {
   }
 }
 
+async function downloadSharedFile(req, res, next) {
+  try {
+    const uuid = req.params.uuid;
+    // Esta debería de estar en el modelo de File no Folder
+    const file = await Folder.findSharedFile(uuid);
+    res.redirect(`/file/download/${file.file_id}`);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   deleteFile,
   getFileDetails,
@@ -389,4 +406,5 @@ module.exports = {
   shareFile,
   uploadFile,
   downloadFile,
+  downloadSharedFile,
 };

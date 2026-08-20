@@ -315,7 +315,7 @@ class Folder {
   static async getFolderHistory(folderId) {
     const folderHistory = await prisma.shared_folders.findMany({
       where: {
-        folder_id: parseInt(reqData.folder_id),
+        folder_id: parseInt(folderId),
       },
       include: {
         folders: {

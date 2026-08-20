@@ -34,7 +34,9 @@
           <h2><%= file.file_name %></h2>
           <h3><%= file.size %></h3>
           <span>Upload date: <%= file.uploaded_at.toLocaleString("es-MX") %></span>
-          <button class="regular-button download-button-file-details">Download</button>
+          <a class="regular-button" style="text-align: center;" href="/file/download/<%= elements.file_id %>">
+            Download
+          </a>
         </div>
       </div>
     </div>

@@ -188,8 +188,6 @@ async function deleteFolder(req, res, next) {
   }
 }
 
-// Aquí estoy mezclando lógica del modelo con la del controlador
-// Luego le hago el refactor
 async function shareFolder(req, res, next) {
   try {
     const result = validationResult(req);
@@ -224,9 +222,7 @@ async function shareFolder(req, res, next) {
     }
 
     const reqData = matchedData(req);
-
     const folderHistory = await Folder.getFolderHistory(reqData.folder_id);
-
     const folderData = folderHistory[0];
 
     if (isSharedFolder(folderHistory)) {
@@ -247,21 +243,46 @@ async function shareFolder(req, res, next) {
       Date.now() + expirationDays * milisecondsPerDay;
     const expirationDate = new Date(expirationTimeMiliseconds);
 
-    const data = {
-      user_id: req.session.passport.user,
-      folder_id: parseInt(reqData.folder_id),
-      expires_at: expirationDate,
-    };
+    async function shareFolderRecursively(folderId) {
+      const data = {
+        user_id: req.session.passport.user,
+        folder_id: parseInt(folderId),
+        expires_at: expirationDate,
+      };
 
-    const sharedFolder = await Folder.shareFolder(data);
+      const folderElements = await Folder.getAllElements(folderId);
 
-    if (sharedFolder.folders.parent_folder_id === null) {
-      req.flash("success", "Folder shared successfully");
-      return res.redirect(dashboardRoute);
+      await Folder.shareFolder(data);
+
+      const folders = folderElements.filter((element) => element.type === "folder");
+      const files = folderElements.filter((element) => element.type === "file").map((element) => {
+        return {
+          user_id: req.session.passport.user,
+          file_id: element.file_id,
+          expires_at: expirationDate,
+        };
+      });
+
+      for(const file of files) {
+        await File.shareFile(file);
+      }
+
+      for(const folder of folders) {
+        await shareFolderRecursively(folder.folder_id);
+      }
     }
 
-    req.flash("success", "Folder shared successfully");
-    res.redirect(`/folder/files/${sharedFolder.folders.parent_folder_id}`);
+    await shareFolderRecursively(reqData.folder_id);
+
+    /*if ( === null) {
+      req.flash("success", "Folder shared successfully");
+      return res.redirect(dashboardRoute);
+    }*/
+   
+    res.redirect(dashboardRoute)
+
+    /*req.flash("success", "Folder shared successfully");
+    res.redirect(`/folder/files/${folderData.folders.parent_folder_id}`);*/
   } catch (err) {
     next(err);
   }
@@ -288,7 +309,7 @@ async function getSharedFolder(req, res, next) {
     }
 
     const isFolder = sharedFolder !== null && sharedFile === null;
-    const owner = await User.getResourceOwner(isFolder);
+    const owner = await User.getResourceOwner(isFolder, sharedFolder, sharedFile);
     const ownerFullName = owner.first_name + " " + owner.last_name;
 
     if (isFolder) {
@@ -305,6 +326,7 @@ async function getSharedFolder(req, res, next) {
         type: "folder",
         areDestructiveActionsEnabled: false,
         owner: ownerFullName,
+        uuid: uuid,
       });
     } else if (!isFolder) {
       if (Date.now() > sharedFile.expires_at.getTime()) {
@@ -323,6 +345,7 @@ async function getSharedFolder(req, res, next) {
         type: "file",
         areDestructiveActionsEnabled: false,
         owner: ownerFullName,
+        uuid: uuid,
       });
     }
   } catch (err) {
@@ -468,6 +491,16 @@ async function downloadFolder(req, res, next) {
   }
 }
 
+async function downloadSharedFolder(req, res, next) {
+  try {
+    const uuid = req.params.uuid;
+    const folder = await Folder.findSharedFolder(uuid);
+    res.redirect(`/folder/download/${folder.folder_id}`);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createFolder,
   getAllFolderElements,
@@ -477,4 +510,5 @@ module.exports = {
   updateFolderName,
   getUpdateFolderView,
   downloadFolder,
+  downloadSharedFolder,
 };
