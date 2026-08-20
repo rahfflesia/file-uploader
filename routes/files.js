@@ -51,4 +51,6 @@ const shareFileValidators = validateShareFile();
 
 file.post("/share", [...shareFileValidators], fileController.shareFile);
 
+file.get("/download/:file_id", [...idValidators], fileController.downloadFile);
+
 module.exports = file;

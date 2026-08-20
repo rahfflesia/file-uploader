@@ -21,7 +21,7 @@ async function recreateFolder(folderId, path, uuid) {
 
   let currentPath = uuid !== null ? `${uuid}/` : path;
 
-  if(uuid === null) {
+  if (uuid === null) {
     currentPath += `${folderData.folder_name}/`;
   }
 
@@ -412,7 +412,7 @@ async function downloadFolder(req, res, next) {
   try {
     const r = validationResult(req);
 
-    if(!r.isEmpty()) {
+    if (!r.isEmpty()) {
       req.flash("error", r.array());
       return res.redirect(dashboardRoute);
     }
@@ -421,17 +421,20 @@ async function downloadFolder(req, res, next) {
     const folderId = parseInt(data.folder_id);
     const folder = await Folder.getFolder(folderId);
 
-    if(!folder) {
+    if (!folder) {
       req.flash("error", "No folder found");
       return res.redirect(dashboardRoute);
     }
 
     const size = await Folder.calculateSize(folder);
 
-    if(size < 1) {
-      console.log("Esta carpeta está vacía y no se puede descargar");
+    if (size < 1) {
       req.flash("error", "An empty folder cannot be downloaded");
-      return res.redirect(dashboardRoute);
+      return res.redirect(
+        folder.parent_folder_id
+          ? `/folder/files/${folder.parent_folder_id}`
+          : dashboardRoute,
+      );
     }
 
     const folderName = folder.folder_name;
@@ -439,27 +442,27 @@ async function downloadFolder(req, res, next) {
     await recreateFolder(folderId, "./", uuid);
     await zip(`./${uuid}`, `./${uuid}.zip`);
 
-    res.download(`./${uuid}.zip`, async (err) => {
+    res.download(`./${uuid}.zip`, `${folder.folder_name}.zip`, async (err) => {
       if (err) {
         console.error(err);
         throw err;
       }
-      
+
       // Delete folders after the download
-      rm(`./${uuid}`, { recursive: true } , (err) => {
-        if(err) {
+      rm(`./${uuid}`, { recursive: true }, (err) => {
+        if (err) {
           console.error(err);
-          return;
+          throw err;
         }
       });
 
-      rm(`./${uuid}.zip`, { recursive: false } , (err) => {
-        if(err) {
+      rm(`./${uuid}.zip`, { recursive: false }, (err) => {
+        if (err) {
           console.error(err);
-          return;
+          throw err;
         }
       });
-    }   );
+    });
   } catch (err) {
     next(err);
   }

@@ -3,6 +3,11 @@ const Folder = require("../models/Folder");
 const cloudinary = require("cloudinary").v2;
 const { convertBytes, isSharedFile } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
+const { randomUUID } = require("node:crypto");
+const fs = require("fs");
+const { Readable } = require("node:stream");
+const { finished } = require("node:stream/promises");
+const { rm } = require("node:fs");
 
 const dashboardRoute = "/dashboard";
 
@@ -322,6 +327,60 @@ async function uploadFile(req, res, next) {
   }
 }
 
+async function downloadFile(req, res, next) {
+  try {
+    const r = validationResult(req);
+
+    if (!r.isEmpty()) {
+      req.flash("error", r.array());
+      return res.redirect(dashboardRoute);
+    }
+
+    const data = matchedData(req);
+    const fileId = data.file_id;
+    const file = await File.getFileDetails(fileId);
+
+    if (!file) {
+      req.flash("error", "No file was found");
+      return res.redirect(dashboardRoute);
+    }
+
+    if (file.bytes < 1) {
+      req.flash("error", "Empty files cannot be downloaded");
+      return res.redirect(
+        file.folder_id ? `/folder/files/${file.folder_id}` : dashboardRoute,
+      );
+    }
+
+    const fileName = file.file_name;
+    const uuid = randomUUID();
+
+    try {
+      const stream = fs.createWriteStream(`./${uuid}`);
+      const { body } = await fetch(file.url);
+      await finished(Readable.fromWeb(body).pipe(stream));
+    } catch (err) {
+      throw err;
+    }
+
+    res.download(`./${uuid}`, `./${fileName}`, (err) => {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
+
+      rm(`./${uuid}`, (err) => {
+        if (err) {
+          console.error(err);
+          throw err;
+        }
+      });
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   deleteFile,
   getFileDetails,
@@ -329,4 +388,5 @@ module.exports = {
   updateFileName,
   shareFile,
   uploadFile,
+  downloadFile,
 };

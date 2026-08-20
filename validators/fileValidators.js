@@ -1,7 +1,5 @@
 const { body, param } = require("express-validator");
 
-function updateFileValidator() {}
-
 function validateId() {
   return [param("file_id").trim().isInt({ min: 1 }).withMessage("Invalid id")];
 }
@@ -37,7 +35,6 @@ function validateUploadFile() {
 }
 
 module.exports = {
-  updateFileValidator,
   validateId,
   validateUpdateFile,
   validateShareFile,
