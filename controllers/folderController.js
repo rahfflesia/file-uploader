@@ -419,12 +419,19 @@ async function downloadFolder(req, res, next) {
 
     const data = matchedData(req);
     const folderId = parseInt(data.folder_id);
-    const size = await Folder.calculateSize();
     const folder = await Folder.getFolder(folderId);
 
+    if(!folder) {
+      req.flash("error", "No folder found");
+      return res.redirect(dashboardRoute);
+    }
+
+    const size = await Folder.calculateSize(folder);
+
     if(size < 1) {
+      console.log("Esta carpeta está vacía y no se puede descargar");
       req.flash("error", "An empty folder cannot be downloaded");
-      return res.redirect(folder.parent_folder_id ? `/folder/files/${folder.parent_folder_id}` : dashboardRoute);
+      return res.redirect(dashboardRoute);
     }
 
     const folderName = folder.folder_name;

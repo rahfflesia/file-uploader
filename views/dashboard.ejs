@@ -280,6 +280,22 @@
         }
       }
 
+      async function downloadFolder(element) {
+        if(element.size === "0 B") {
+          return;
+        }
+
+        const response = await fetch(`/folder/download/${element.folder_id}`);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', element.folder_name);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
       for(let i = 0; i < downloadButtons.length; i++) {
         const downloadButton = downloadButtons[i];
         downloadButton.addEventListener('click', async () => {
@@ -289,15 +305,9 @@
               download(element);
               break;
             case 'folder':
-              const response = await fetch(`/folder/download/${element.folder_id}`);
-              const blob = await response.blob();
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', element.folder_name);
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+              console.log(element);
+              await downloadFolder(element);
+              console.log(<%- JSON.stringify(locals.errors) %>);
               break;
             default:
               console.error("Invalid type");

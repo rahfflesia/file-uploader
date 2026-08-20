@@ -28,10 +28,10 @@
             </div>
             <span><%= element.size %></span>
             <span style="display: flex; gap: .5rem;">
-                <div style="display: flex; gap: .25rem; justify-content: center; align-items: center;">
+                <a style="display: flex; gap: .25rem; align-items: center; justify-content: center;" href="/folder/download/<%= element.folder_id %>">
                     <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
-                    <button class="download-file-button share-folder-button download-button-desktop">Download</button>
-                </div>
+                    <span class="blue">Download</span>
+                </a>
                 <% if(areDestructiveActionsEnabled) { %>
                     <% if(element.type === "folder") { %>
                     <div class="share-button-wrapper" style="display: flex; gap: .25rem; align-items: center; justify-content: center;">

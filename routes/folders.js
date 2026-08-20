@@ -64,6 +64,6 @@ folder.get(
 );
 
 const getDownloadFolderValidator = validateDownloadFolder();
-folder.get("/download/:folder_id", [...getDownloadFolderValidator] ,folderController.downloadFolder);
+folder.get("/download/:folder_id", [...getDownloadFolderValidator], folderController.downloadFolder);
 
 module.exports = folder;
