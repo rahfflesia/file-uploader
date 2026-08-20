@@ -410,10 +410,24 @@ async function updateFolderName(req, res, next) {
 
 async function downloadFolder(req, res, next) {
   try {
-    const folderId = parseInt(req.params.folder_id);
-    const folder = await Folder.getFolder(folderId);
-    const folderName = folder.folder_name;
+    const r = validationResult(req);
 
+    if(!r.isEmpty()) {
+      req.flash("error", r.array());
+      return res.redirect(dashboardRoute);
+    }
+
+    const data = matchedData(req);
+    const folderId = parseInt(data.folder_id);
+    const size = await Folder.calculateSize();
+    const folder = await Folder.getFolder(folderId);
+
+    if(size < 1) {
+      req.flash("error", "An empty folder cannot be downloaded");
+      return res.redirect(folder.parent_folder_id ? `/folder/files/${folder.parent_folder_id}` : dashboardRoute);
+    }
+
+    const folderName = folder.folder_name;
     const uuid = randomUUID();
     await recreateFolder(folderId, "./", uuid);
     await zip(`./${uuid}`, `./${uuid}.zip`);
@@ -438,7 +452,7 @@ async function downloadFolder(req, res, next) {
           return;
         }
       });
-    });
+    }   );
   } catch (err) {
     next(err);
   }

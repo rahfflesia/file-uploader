@@ -9,6 +9,7 @@ const {
   validateShareFolder,
   validateUpdateFolder,
   validateUpdateFolderView,
+  validateDownloadFolder,
 } = require("../validators/folderValidators");
 
 const folderController = require("../controllers/folderController");
@@ -62,6 +63,7 @@ folder.get(
   folderController.getUpdateFolderView,
 );
 
-folder.get("/download/:folder_id", folderController.downloadFolder);
+const getDownloadFolderValidator = validateDownloadFolder();
+folder.get("/download/:folder_id", [...getDownloadFolderValidator] ,folderController.downloadFolder);
 
 module.exports = folder;

@@ -121,6 +121,18 @@ function validateUpdateFolderView() {
   ];
 }
 
+function validateDownloadFolder() {
+  return [
+    param("folder_id")
+      .isInt({ min: 1 })
+      .withMessage("Invalid id")
+      .bail()
+      .trim()
+      .notEmpty()
+      .withMessage("The id cannot be empty"),
+  ];
+}
+
 module.exports = {
   validateGetSharedFolder,
   validateCreateFolder,
@@ -129,4 +141,5 @@ module.exports = {
   validateShareFolder,
   validateUpdateFolder,
   validateUpdateFolderView,
+  validateDownloadFolder
 };
