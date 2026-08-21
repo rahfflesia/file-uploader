@@ -10,11 +10,13 @@ const {
   validateShareFile,
   validateUpdateFile,
   validateUploadFile,
+  validateDownloadSharedFile,
 } = require("../validators/fileValidators");
 
 const fileController = require("../controllers/fileController");
 
-file.get("/shared/download/:uuid", fileController.downloadSharedFile); 
+const downloadSharedFileValidators = validateDownloadSharedFile();
+file.get("/shared/download/:uuid", [...downloadSharedFileValidators] ,fileController.downloadSharedFile); 
 
 file.use(isAuthenticated);
 

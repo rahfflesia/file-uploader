@@ -34,9 +34,25 @@ function validateUploadFile() {
   ];
 }
 
+function validateDownloadSharedFile() {
+  return [
+    param("uuid")
+    .isString()
+    .withMessage("Identifier must be a string")
+    .bail()
+    .trim()
+    .notEmpty()
+    .withMessage("The identifier cannot be empty")
+    .bail()
+    .isUUID()
+    .withMessage("Invalid identifier")
+  ];
+}
+
 module.exports = {
   validateId,
   validateUpdateFile,
   validateShareFile,
   validateUploadFile,
+  validateDownloadSharedFile,
 };

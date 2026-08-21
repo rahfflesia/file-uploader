@@ -86,15 +86,14 @@
           </div>
         </h3>
       </div>
-    
-      <div class="sm-mb">
-        <form action="/folder/files/<%= folder.folder_id %>" method="get" class="search-bar-form">
-          <input type="text" name="q" class="search-input" placeholder="Search anything...">
-          <button class="regular-button" type="submit">Search</button>
-        </form>
-      </div>
 
       <% if(elements.rootData.length > 0) { %>
+        <div class="sm-mb">
+          <form action="/folder/files/<%= folder.folder_id %>" method="get" class="search-bar-form">
+            <input type="text" name="q" class="search-input" placeholder="Search anything...">
+              <button class="regular-button" type="submit">Search</button>
+          </form>
+        </div>
         <%- include("../partials/table") %>
       <% } else { %>
           <% if(elements.source === "none") { %>
@@ -105,6 +104,12 @@
               <span>This folder has no content</span>
             </div>
           <% } else { %>
+            <div class="sm-mb">
+              <form action="/folder/files/<%= folder.folder_id %>" method="get" class="search-bar-form">
+                <input type="text" name="q" class="search-input" placeholder="Search anything...">
+                <button class="regular-button" type="submit">Search</button>
+              </form>
+            </div>
             <div class="flex-column flex-1 no-folders-wrapper">
               <div class="no-folders-img-wrapper">
                 <img src="https://img.icons8.com/?size=100&id=jos3LB58rh8D&format=png&color=1b71e1" alt="no-results-icon">
@@ -119,9 +124,6 @@
     const uploadFileDialog = document.querySelector(".upload-file-dialog");
     const uploadFileButton = document.querySelector(".upload-file-button");
     const closeDialogButton = document.querySelector(".close-icon");
-
-    const filesArray = <%- JSON.stringify(elements) %>
-    const downloadButtons = document.querySelectorAll(".download-file-button");
 
     const createFolderModal = document.querySelector(".folder-dialog");
     const createFolderButton = document.querySelector(".create-folder-button");
@@ -163,20 +165,6 @@
       document.querySelector(".link-dialog").close();
     });
 
-    function download(file) {
-      fetch(file.url).then((response) => response.blob()).then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = file.file_name;
-          a.click();
-          document.body.appendChild(a);
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }).catch((error) => console.error(error));
-    }
-
     function viewShareLink(element) {
         const linkDialog = document.querySelector(".link-dialog");
         const h2 = document.querySelector(".link-dialog h2");
@@ -199,16 +187,6 @@
         fileIdInput.value = fileId;
       }
 
-      function recurse(folder) {
-        for(const file of folder.files) {
-          download(file);
-        }
-
-        for(const child of folder.childs) {
-          recurse(child);
-        }
-      }
-
       async function copyLinkToClipboard() {
         try {
           const link = document.querySelector(".folder-link");
@@ -220,24 +198,6 @@
         }
       }
 
-    for(let i = 0; i < downloadButtons.length; i++) {
-      const downloadButton = downloadButtons[i];
-      downloadButton.addEventListener('click', () => {
-        const file = filesArray[i];
-
-        switch(file.type) {
-          case "file":
-            download(file);
-            break;
-          case "folder":
-            recurse(file);
-            break;
-          default:
-            console.error("Invalid type");
-        }
-      });
-    }
-
     const resourceDetailsDialog = document.querySelector(".resource-details");
     const closeResourceDetailsDialogButton = document.querySelector(".close-resource-details-dialog");
 
@@ -246,7 +206,6 @@
     });
 
     function openResourceDetailsDialog(element) {
-        console.log(element);
         const resourceName = document.querySelector(".resource-name");
         const headerDetails = document.querySelector(".header-details");
         const resourceSize = document.querySelector(".resource-size");

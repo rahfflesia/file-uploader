@@ -34,6 +34,7 @@ async function postSignup(req, res, next) {
 
     await User.createUser(signUpData);
 
+    req.flash("success", "Successful sign up");
     res.status(201).redirect("/auth/log-in");
   } catch (err) {
     next(err);

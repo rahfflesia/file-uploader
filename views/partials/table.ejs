@@ -75,10 +75,17 @@
             <div class="options pointer grid-center">
                 <img src="https://img.icons8.com/?size=100&id=84119&format=png&color=000000" alt="more-options">
                 <div class="options-list box-shadow">
-                    <div class="download-file-button" style="display: flex; gap: .25rem; justify-content: flex-start; align-items: center;">
-                        <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
-                        <button class="share-folder-button">Download</button>
-                    </div>
+                    <% if(downloadType === "public") { %>
+                        <a class="blue" style="display: flex; gap: .25rem; justify-content: flex-start; align-items: center;" href="<%= element.download_link %>">
+                            <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                            Download
+                        </a>
+                    <% } else { %>
+                        <a class="blue" style="display: flex; gap: .25rem; align-items: center; justify-content: center;" href="<%= element.type === 'folder' ? `/folder/download/${element.folder_id}` : `/file/download/${element.file_id}`%>">
+                            <img src="https://img.icons8.com/?size=100&id=83159&format=png&color=1b71e1" alt="download-button" class="download-icon">
+                            Download
+                        </a>
+                    <% } %>
                     <% if(areDestructiveActionsEnabled) { %>
                     <% if(element.type === "folder") { %>
                     <div class="share-button-wrapper" onclick="shareFolder(<%= element.folder_id %>)" style="display: flex; gap: .25rem; align-items: center; justify-content: flex-start;">

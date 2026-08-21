@@ -327,6 +327,8 @@ async function getSharedFolder(req, res, next) {
       }
 
       const rootData = await Folder.getAllElements(sharedFolder.folder_id);
+      const folderData = await Folder.getFolder(sharedFolder.folder_id);
+      const folderName = folderData.folder_name;
 
       return res.status(200).render("./folders/sharedFolder", {
         elements: {
@@ -337,6 +339,7 @@ async function getSharedFolder(req, res, next) {
         owner: ownerFullName,
         uuid: uuid,
         downloadType: "public",
+        folderName: folderName,
       });
     } else if (!isFolder) {
       if (Date.now() > sharedFile.expires_at.getTime()) {
@@ -503,8 +506,22 @@ async function downloadFolder(req, res, next) {
 
 async function downloadSharedFolder(req, res, next) {
   try {
-    const uuid = req.params.uuid;
+    const r = validationResult(req);
+
+    if(!r.isEmpty()) {
+      req.flash("error", r.array());
+      return res.redirect(dashboardRoute);
+    }
+
+    const data = matchedData(req);
+    const uuid = data.uuid;
     const folder = await Folder.findSharedFolder(uuid);
+
+    if(!folder) {
+      req.flash("error", "Invalid download link");
+      return res.redirect(dashboardRoute);
+    }
+
     res.redirect(`/folder/download/${folder.folder_id}`);
   } catch (err) {
     next(err);

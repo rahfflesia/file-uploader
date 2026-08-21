@@ -10,6 +10,7 @@ const {
   validateUpdateFolder,
   validateUpdateFolderView,
   validateDownloadFolder,
+  validateDownloadSharedFolder,
 } = require("../validators/folderValidators");
 
 const folderController = require("../controllers/folderController");
@@ -22,7 +23,8 @@ folder.get(
   folderController.getSharedFolder,
 );
 
-folder.get("/shared/download/:uuid", folderController.downloadSharedFolder);
+const getDownloadSharedFolderValidators = validateDownloadSharedFolder();
+folder.get("/shared/download/:uuid", [...getDownloadSharedFolderValidators] ,folderController.downloadSharedFolder);
 
 folder.use(isAuthenticated);
 

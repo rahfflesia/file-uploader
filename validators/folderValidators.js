@@ -133,6 +133,21 @@ function validateDownloadFolder() {
   ];
 }
 
+function validateDownloadSharedFolder() {
+  return [
+    param("uuid")
+    .isString()
+    .withMessage("Identifier must be a string")
+    .bail()
+    .trim()
+    .notEmpty()
+    .withMessage("The identifier cannot be empty")
+    .bail()
+    .isUUID()
+    .withMessage("Invalid identifier")
+  ];
+}
+
 module.exports = {
   validateGetSharedFolder,
   validateCreateFolder,
@@ -141,5 +156,6 @@ module.exports = {
   validateShareFolder,
   validateUpdateFolder,
   validateUpdateFolderView,
-  validateDownloadFolder
+  validateDownloadFolder,
+  validateDownloadSharedFolder,
 };

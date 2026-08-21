@@ -107,19 +107,26 @@
         </div>
       </div>
 
-      <div class="sm-mb">
-        <form action="/dashboard" method="get" class="search-bar-form">
-          <input type="text" name="q" placeholder="Search anything..." class="search-input">
-          <button type="submit" class="regular-button">
-            Search
-          </button>
-        </form>
-      </div>
-
       <% if(elements.rootData.length > 0) { %>
+        <div class="sm-mb">
+          <form action="/dashboard" method="get" class="search-bar-form">
+            <input type="text" name="q" placeholder="Search anything..." class="search-input">
+              <button type="submit" class="regular-button">
+                Search
+              </button>
+          </form>
+        </div>
           <%- include("./partials/table") %>
       <% } else { %>
           <% if(elements.source === "search") { %>
+            <div class="sm-mb">
+              <form action="/dashboard" method="get" class="search-bar-form">
+                <input type="text" name="q" placeholder="Search anything..." class="search-input">
+                  <button type="submit" class="regular-button">
+                    Search
+                  </button>
+              </form>
+            </div>
             <div class="flex-column flex-1 no-folders-wrapper">
               <div class="no-folders-img-wrapper">
                 <img src="https://img.icons8.com/?size=100&id=jos3LB58rh8D&format=png&color=1b71e1" alt="no-results-icon">
@@ -153,9 +160,6 @@
       const uploadFileButton = document.querySelector(".upload-file-button");
       const uploadFileModal = document.querySelector(".upload-file-dialog");
       const closeUploadDialogButton = document.querySelector(".close-upload-file-dialog");
-
-      const elementsArray = <%- JSON.stringify(elements.rootData) %>
-      const downloadButtons = document.querySelectorAll(".download-button-desktop");
 
       closeLinkDialogButton.addEventListener('click', () => {
         linkDialog.close();
@@ -223,20 +227,6 @@
         resourceDetailsDialog.showModal();
       }
 
-      function download(file) {
-        fetch(file.url).then((response) => response.blob()).then((blob) => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = file.file_name;
-            a.click();
-            document.body.appendChild(a);
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }).catch((error) => console.error(error));
-      }
-
       async function copyLinkToClipboard() {
         try {
           const link = document.querySelector(".folder-link");
@@ -268,51 +258,6 @@
         const fileIdInput = document.querySelector('.file-id-input');
         shareFileDialog.showModal();
         fileIdInput.value = fileId;
-      }
-
-      function recurse(folder) {
-        for(const file of folder.files) {
-          download(file);
-        }
-
-        for(const child of folder.childs) {
-          recurse(child);
-        }
-      }
-
-      async function downloadFolder(element) {
-        if(element.size === "0 B") {
-          return;
-        }
-
-        const response = await fetch(`/folder/download/${element.folder_id}`);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', element.folder_name);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      for(let i = 0; i < downloadButtons.length; i++) {
-        const downloadButton = downloadButtons[i];
-        downloadButton.addEventListener('click', async () => {
-          const element = elementsArray[i];
-          switch(element.type) {
-            case 'file':
-              download(element);
-              break;
-            case 'folder':
-              console.log(element);
-              await downloadFolder(element);
-              console.log(<%- JSON.stringify(locals.errors) %>);
-              break;
-            default:
-              console.error("Invalid type");
-          }
-        });
       }
 
       window.addEventListener("resize", () => {

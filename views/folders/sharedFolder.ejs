@@ -8,16 +8,25 @@
   </head>
   <body class="mh-100dvh flex-column">
     <%- include("../partials/header"); %>
+    <%- include("../partials/details"); %>
+    <%- include("../partials/errorToast"); %>
+    <%- include("../partials/successToast"); %>
     <main class="std-padding dashboard flex-column flex-1">
       <% if(type === "folder") { %>
-        <h2 class="sm-mb"><%= owner %> shared this folder with you</h2>
         <% if(elements.rootData.length > 0) { %>
+          <h2 class="sm-mb"><%= owner %> shared this folder with you</h2>
+          <div class="sm-mb"><h2><span class="blue"><%= folderName %>'s</span> content</h2></div>
           <div class="sm-mb">
             <a class="regular-button" href="/folder/shared/download/<%= uuid %>">Download folder</a>
           </div>
           <%- include("../partials/table") %>
         <% } else { %>
-          <div>This folder has no files</div>
+          <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=83172&format=png&color=1b71e1" alt="no-folders-icon">
+              </div>
+              <span>This folder has no files</span>
+          </div>
         <% } %>
       <% } else if (type === "file") { %>
         <div class="file-details-wrapper grid-center" style="flex: 1">
