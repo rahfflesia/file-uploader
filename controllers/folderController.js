@@ -143,6 +143,7 @@ async function getAllFolderElements(req, res, next) {
       folder: folderData,
       pathArray: pathArray,
       areDestructiveActionsEnabled: true,
+      downloadType: "private",
     });
   } catch (err) {
     next(err);
@@ -254,20 +255,24 @@ async function shareFolder(req, res, next) {
 
       await Folder.shareFolder(data);
 
-      const folders = folderElements.filter((element) => element.type === "folder");
-      const files = folderElements.filter((element) => element.type === "file").map((element) => {
-        return {
-          user_id: req.session.passport.user,
-          file_id: element.file_id,
-          expires_at: expirationDate,
-        };
-      });
+      const folders = folderElements.filter(
+        (element) => element.type === "folder",
+      );
+      const files = folderElements
+        .filter((element) => element.type === "file")
+        .map((element) => {
+          return {
+            user_id: req.session.passport.user,
+            file_id: element.file_id,
+            expires_at: expirationDate,
+          };
+        });
 
-      for(const file of files) {
+      for (const file of files) {
         await File.shareFile(file);
       }
 
-      for(const folder of folders) {
+      for (const folder of folders) {
         await shareFolderRecursively(folder.folder_id);
       }
     }
@@ -278,8 +283,8 @@ async function shareFolder(req, res, next) {
       req.flash("success", "Folder shared successfully");
       return res.redirect(dashboardRoute);
     }*/
-   
-    res.redirect(dashboardRoute)
+
+    res.redirect(dashboardRoute);
 
     /*req.flash("success", "Folder shared successfully");
     res.redirect(`/folder/files/${folderData.folders.parent_folder_id}`);*/
@@ -309,7 +314,11 @@ async function getSharedFolder(req, res, next) {
     }
 
     const isFolder = sharedFolder !== null && sharedFile === null;
-    const owner = await User.getResourceOwner(isFolder, sharedFolder, sharedFile);
+    const owner = await User.getResourceOwner(
+      isFolder,
+      sharedFolder,
+      sharedFile,
+    );
     const ownerFullName = owner.first_name + " " + owner.last_name;
 
     if (isFolder) {
@@ -327,6 +336,7 @@ async function getSharedFolder(req, res, next) {
         areDestructiveActionsEnabled: false,
         owner: ownerFullName,
         uuid: uuid,
+        downloadType: "public",
       });
     } else if (!isFolder) {
       if (Date.now() > sharedFile.expires_at.getTime()) {

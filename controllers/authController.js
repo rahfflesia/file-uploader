@@ -76,6 +76,7 @@ async function getDashboard(req, res, next) {
       folder: null,
       path: "/",
       areDestructiveActionsEnabled: true,
+      downloadType: "private",
     });
   } catch (err) {
     next(err);

@@ -40,15 +40,15 @@ class File {
   static async getSharedFileHistory(fileId) {
     const fileHistory = await prisma.shared_files.findMany({
       where: {
-        file_id: parseInt(fileId)
+        file_id: parseInt(fileId),
       },
       include: {
         files: {
           select: {
             folder_id: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     return fileHistory;

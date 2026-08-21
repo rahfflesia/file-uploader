@@ -8,7 +8,7 @@
   </head>
   <body class="mh-100dvh flex-column">
     <%- include("../partials/header"); %>
-    <div class="file-details-wrapper grid-center" style="flex: 1">
+    <div class="file-details-wrapper">
       <div class="file-details">
         <div class="file-preview-wrapper sm-mb">
           <% if(file.mime_type.includes('image')) { %>
@@ -34,7 +34,7 @@
           <h2><%= file.file_name %></h2>
           <h3><%= file.size %></h3>
           <span>Upload date: <%= file.uploaded_at.toLocaleString("es-MX") %></span>
-          <a class="regular-button" style="text-align: center;" href="/file/download/<%= elements.file_id %>">
+          <a class="regular-button" style="text-align: center;" href="/file/download/<%= file.file_id %>">
             Download
           </a>
         </div>

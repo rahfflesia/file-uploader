@@ -422,6 +422,7 @@ label {
   border-radius: var(--border-radius);
   padding: var(--padding);
   margin: 2rem;
+  max-width: 100%;
 }
 
 .file-details-info {
@@ -431,9 +432,13 @@ label {
   gap: 1.25rem;
 }
 
-.file-preview-wrapper img,
-video,
-audio {
+.file-details-info h2 {
+  word-wrap: break-word;
+}
+
+.file-preview-wrapper video,
+.file-preview-wrapper audio {
+  max-width: 500px;
   width: 100%;
   height: auto;
   display: block;
@@ -442,10 +447,17 @@ audio {
 
 .file-preview-wrapper img {
   object-fit: cover;
+  max-width: 500px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--border-radius);
 }
 
 .file-preview-wrapper {
-  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .search-input {
@@ -639,6 +651,14 @@ audio {
   word-break: break-word;
 }
 
+.file-details-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
 @media (width <= 400px) {
   .hamburger-menu {
     display: grid;
@@ -661,7 +681,7 @@ audio {
   }
 
   .file-preview-wrapper {
-    max-width: none;
+    max-width: 100%;
   }
 
   .folder-name {
