@@ -2,6 +2,17 @@ const { param, body, query } = require("express-validator");
 
 function validateGetSharedFolder() {
   return [
+    query("q")
+    .optional({ values: "undefined" })
+    .isString()
+    .withMessage("Invalid search term")
+    .bail()
+    .trim()
+    .notEmpty()
+    .withMessage("The search term cannot be empty")
+    .bail()
+    .isLength({min: 1, max: 2048})
+    .withMessage("The search term is too long"),
     param("uuid")
       .isString()
       .withMessage("The link identifier must be a string")

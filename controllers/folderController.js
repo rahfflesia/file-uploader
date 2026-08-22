@@ -303,6 +303,7 @@ async function getSharedFolder(req, res, next) {
     }
 
     const data = matchedData(req);
+    const q = data.q?.toLowerCase();
     const uuid = data.uuid;
 
     const sharedFolder = await Folder.findSharedFolder(uuid);
@@ -327,12 +328,14 @@ async function getSharedFolder(req, res, next) {
       }
 
       const rootData = await Folder.getAllElements(sharedFolder.folder_id);
+      const filteredElements = q ? rootData.filter((element) => element.file_name?.toLowerCase().includes(q) || element.folder_name?.toLowerCase().includes(q)) : rootData;
       const folderData = await Folder.getFolder(sharedFolder.folder_id);
       const folderName = folderData.folder_name;
+      const source = q ? "search" : "none";
 
       return res.status(200).render("./folders/sharedFolder", {
         elements: {
-          rootData: rootData,
+          rootData: filteredElements,
         },
         type: "folder",
         areDestructiveActionsEnabled: false,
@@ -340,8 +343,15 @@ async function getSharedFolder(req, res, next) {
         uuid: uuid,
         downloadType: "public",
         folderName: folderName,
-      });
+        source: source,
+       });
     } else if (!isFolder) {
+
+      if(q) {
+        req.flash("error", "You can only search in folders");
+        return res.redirect(dashboardRoute);
+      }
+
       if (Date.now() > sharedFile.expires_at.getTime()) {
         return res.redirect("/expired-link");
       }

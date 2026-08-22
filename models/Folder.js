@@ -351,6 +351,17 @@ class Folder {
 
     return sharedFolder;
   }
+
+  static async updateLastUsed(folderId, date) {
+    await prisma.folders.update({
+      data: {
+        last_used: date,
+      },
+      where: {
+        folder_id: parseInt(folderId)
+      }
+    });
+  }
 }
 
 module.exports = Folder;

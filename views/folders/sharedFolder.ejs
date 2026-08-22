@@ -19,14 +19,33 @@
           <div class="sm-mb">
             <a class="regular-button" href="/folder/shared/download/<%= uuid %>">Download folder</a>
           </div>
+          <form action="/folder/share/<%= uuid %>" method="get" class="search-bar-form sm-mb">
+            <input type="text" name="q" placeholder="Search anything..." class="search-input">
+            <button type="submit" class="regular-button">Search</button>
+          </form>
           <%- include("../partials/table") %>
         <% } else { %>
-          <div class="flex-column flex-1 no-folders-wrapper">
+          <% if(source === "none") { %>
+            <div class="flex-column flex-1 no-folders-wrapper">
               <div class="no-folders-img-wrapper">
                 <img src="https://img.icons8.com/?size=100&id=83172&format=png&color=1b71e1" alt="no-folders-icon">
               </div>
               <span>This folder has no files</span>
-          </div>
+            </div>
+          <% } else { %>
+            <h2 class="sm-mb"><%= owner %> shared this folder with you</h2>
+            <div class="sm-mb"><h2><span class="blue"><%= folderName %>'s</span> content</h2></div>
+            <form action="/folder/share/<%= uuid %>" method="get" class="search-bar-form sm-mb">
+              <input type="text" name="q" placeholder="Search anything..." class="search-input">
+              <button type="submit" class="regular-button">Search</button>
+            </form>
+            <div class="flex-column flex-1 no-folders-wrapper">
+              <div class="no-folders-img-wrapper">
+                <img src="https://img.icons8.com/?size=100&id=jos3LB58rh8D&format=png&color=1b71e1" alt="no-results-icon">
+              </div>
+              <span>No results found</span>
+            </div>
+          <% } %>
         <% } %>
       <% } else if (type === "file") { %>
         <div class="file-details-wrapper grid-center" style="flex: 1">

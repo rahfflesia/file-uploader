@@ -320,6 +320,9 @@ async function uploadFile(req, res, next) {
       return res.status(201).redirect(dashboardRoute);
     }
 
+    const now = new Date();
+    await Folder.updateLastUsed(folderId, now); 
+
     req.flash("success", "File uploaded successfully");
     res.status(201).redirect(`/folder/files/${folderId}`);
   } catch (err) {
@@ -389,9 +392,23 @@ async function downloadFile(req, res, next) {
 
 async function downloadSharedFile(req, res, next) {
   try {
-    const uuid = req.params.uuid;
+    const r = validationResult(req);
+
+    if(!r.isEmpty()) {
+      req.flash("error", r.array());
+      return res.redirect(dashboardRoute);
+    }
+
+    const data = matchedData(req);
+    const uuid = data.uuid;
     // Esta debería de estar en el modelo de File no Folder
     const file = await Folder.findSharedFile(uuid);
+
+    if(!file) {
+      req.flash("error", "No file found");
+      return res.redirect(dashboardRoute);
+    }
+
     res.redirect(`/file/download/${file.file_id}`);
   } catch (err) {
     next(err);
