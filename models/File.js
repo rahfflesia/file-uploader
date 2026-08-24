@@ -2,9 +2,10 @@ const prisma = require("../lib/prisma");
 
 class File {
   static async createFile(data) {
-    await prisma.files.create({
+    const uploadedFile = await prisma.files.create({
       data: data,
     });
+    return uploadedFile;
   }
 
   static async deleteFile(fileId) {

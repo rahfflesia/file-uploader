@@ -4,7 +4,6 @@ const { validationResult, matchedData } = require("express-validator");
 const File = require("../models/File");
 const User = require("../models/User");
 const { mkdir } = require("node:fs/promises");
-const https = require("https");
 const fs = require("fs");
 const { Readable } = require("stream");
 const { finished } = require("stream/promises");
@@ -70,7 +69,25 @@ async function createFolder(req, res, next) {
       parent_folder_id: parentFolderId,
     };
 
-    await Folder.createFolder(folderData);
+    const createdFolder = await Folder.createFolder(folderData);
+
+    if(parentFolderId) {
+      const rootId = await Folder.getRootFolderId(parentFolderId);
+      const rootFolderHistory = await Folder.getFolderHistory(rootId);
+
+      // Share folder if it is created inside a shared folder
+      if(isSharedFolder(rootFolderHistory)) {
+        const nonExpiredRootFolderData = rootFolderHistory.filter((reg) => Date.now() < reg.expires_at.getTime());
+        const data = nonExpiredRootFolderData[0];
+        const folderData = {
+          user_id: req.session.passport.user,
+          folder_id: parseInt(createdFolder.folder_id),
+          expires_at: data.expires_at,
+        }
+
+        await Folder.shareFolder(folderData);
+      }
+    }
 
     if (parentFolderId === null) {
       req.flash("success", "Folder created successfully");

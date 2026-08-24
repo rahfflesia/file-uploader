@@ -1,7 +1,7 @@
 const File = require("../models/File");
 const Folder = require("../models/Folder");
 const cloudinary = require("cloudinary").v2;
-const { convertBytes, isSharedFile } = require("../helpers/helpers");
+const { convertBytes, isSharedFile, isSharedFolder } = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
 const { randomUUID } = require("node:crypto");
 const fs = require("fs");
@@ -313,7 +313,25 @@ async function uploadFile(req, res, next) {
       user_id: userId,
     };
 
-    await File.createFile(fileData);
+    const uploadedFile = await File.createFile(fileData);
+
+    if(folderId) {
+      const parentFolderId = await Folder.getRootFolderId(folderId);
+      const folderHistory = await Folder.getFolderHistory(parentFolderId);
+
+      if(isSharedFolder(folderHistory) && parentFolderId) {
+        const notExpiredFolderData = folderHistory.filter((reg) => Date.now() < reg.expires_at.getTime());
+        // This should always only have one element
+        const folderData = notExpiredFolderData[0];
+        const fileData = {
+          user_id: req.session.passport.user,
+          file_id: uploadedFile.file_id,
+          expires_at: folderData.expires_at,
+        };
+
+        await File.shareFile(fileData);
+      }
+    }
 
     if (folderId === null) {
       req.flash("success", "File uploaded successfully");

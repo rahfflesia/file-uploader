@@ -8,9 +8,10 @@ const cloudinary = require("cloudinary").v2;
 
 class Folder {
   static async createFolder(folderData) {
-    await prisma.folders.create({
+    const createdFolder = await prisma.folders.create({
       data: folderData,
     });
+    return createdFolder;
   }
 
   static async getAllUserFolders(userId) {
@@ -361,6 +362,21 @@ class Folder {
         folder_id: parseInt(folderId)
       }
     });
+  }
+
+  static async getRootFolderId (folderId) {
+    const idToSearch = parseInt(folderId);
+
+    let folder = await this.getFolder(idToSearch);
+    let parentFolderId = null;
+
+    while(folder.parent_folder_id !== null) {
+      folder = await this.getFolder(folder.parent_folder_id);
+    }
+
+    parentFolderId = folder.folder_id;
+
+    return parentFolderId;
   }
 }
 
