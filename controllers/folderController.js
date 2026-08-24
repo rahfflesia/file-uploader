@@ -369,7 +369,7 @@ async function getSharedFolder(req, res, next) {
         return res.redirect(dashboardRoute);
       }
 
-      if (Date.now() > sharedFile.expires_at.getTime()) {
+      if (Date.now() >= sharedFile.expires_at.getTime()) {
         return res.redirect("/expired-link");
       }
 
@@ -500,7 +500,6 @@ async function downloadFolder(req, res, next) {
       );
     }
 
-    const folderName = folder.folder_name;
     const uuid = randomUUID();
     await recreateFolder(folderId, "./", uuid);
     await zip(`./${uuid}`, `./${uuid}.zip`);
@@ -547,6 +546,10 @@ async function downloadSharedFolder(req, res, next) {
     if(!folder) {
       req.flash("error", "Invalid download link");
       return res.redirect(dashboardRoute);
+    }
+
+    if(Date.now() >= folder.expires_at.getTime()) {
+      return res.redirect("/expired-link");
     }
 
     res.redirect(`/folder/download/${folder.folder_id}`);

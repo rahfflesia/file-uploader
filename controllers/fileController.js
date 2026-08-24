@@ -427,6 +427,10 @@ async function downloadSharedFile(req, res, next) {
       return res.redirect(dashboardRoute);
     }
 
+    if(Date.now() >= file.expires_at.getTime()) {
+      return res.redirect("/expired-link");
+    }
+
     res.redirect(`/file/download/${file.file_id}`);
   } catch (err) {
     next(err);
