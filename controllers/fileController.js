@@ -248,8 +248,6 @@ async function shareFile(req, res, next) {
 
 async function uploadFile(req, res, next) {
   try {
-    console.log("Me ha llegado una peticion");
-
     const r = validationResult(req);
     const userId = req.session.passport.user;
 
@@ -352,7 +350,6 @@ async function uploadFile(req, res, next) {
     }
 
     if (folderId === null) {
-      console.log("Archivo subido exitosamente");
       req.flash("success", "File uploaded successfully");
       return res.status(201).redirect(dashboardRoute);
     }

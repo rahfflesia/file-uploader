@@ -86,4 +86,49 @@
       <% } %>
     </main>
   </body>
+  <script defer>
+    const resourceDetailsDialog = document.querySelector(".resource-details");
+    const closeResourceDetailsDialogButton = document.querySelector(".close-resource-details-dialog");
+
+    closeResourceDetailsDialogButton.addEventListener("click", () => {
+      resourceDetailsDialog.close();
+    });
+
+    function openResourceDetailsDialog(element) {
+        const resourceName = document.querySelector(".resource-name");
+        const headerDetails = document.querySelector(".header-details");
+        const resourceSize = document.querySelector(".resource-size");
+        const resourceUploadDate = document.querySelector(".resource-upload-date");
+        const fileExtension = document.querySelector(".file-extension-details");
+
+        const capitalizedType = element.type.charAt(0).toUpperCase() + element.type.slice(1);
+        headerDetails.textContent = `${capitalizedType} details`;
+
+        switch(element.type) {
+          case "file":
+            resourceName.textContent = "Name: " + element.file_name;
+            resourceSize.textContent = "Size: " + element.size;
+
+            if(element.file_extension) {
+              fileExtension.textContent = `Type: ${element.file_extension}`;
+            }
+
+            const uploadDate = new Date(element.uploaded_at);
+            resourceUploadDate.textContent = "Upload date: " + uploadDate.toLocaleString("es-MX");
+            break;
+          case "folder":
+            resourceName.textContent = "Name: " + element.folder_name;
+            resourceSize.textContent = element.size === "0 B" ? "This folder is empty" : "Size: " + element.size;
+
+            const lastUploadDate = new Date(element.last_used);
+            resourceUploadDate.textContent = "Last upload (or creation date if a file has never been uploaded): " + lastUploadDate.toLocaleString("es-MX");
+            break;
+          default:
+            console.error("This type of resource is not supported");
+            return;
+        }
+
+        resourceDetailsDialog.showModal();
+      }
+  </script>
 </html>

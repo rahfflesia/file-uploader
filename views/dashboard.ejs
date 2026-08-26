@@ -23,7 +23,7 @@
     <%- include("./partials/errorToast") %>
     <%- include("./partials/successToast") %>
     <%- include("./partials/details") %>
-    <%- include("./partials/uploadFileToast") %>
+    <%- include("./partials/uploadFileToast") %> 
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>
@@ -273,41 +273,14 @@
         }
       });
 
-      // Submit button from the upload file form
       const uploadFileForm = document.querySelector(".file-upload-form");
+      const uploadFileToast = document.querySelector(".upload-file-toast");
 
-      uploadFileForm.addEventListener("submit", (event) => {
-        event.preventDefault();
+      uploadFileForm.addEventListener("submit", () => {
+        uploadFileModal.close();
 
-        const inputFile = document.querySelector(".input-file");
-        const file = inputFile.files[0];
-        const request = new XMLHttpRequest();
-
-        const formData = new FormData();
-        formData.append("archivo", file);
-
-         let currentPercentageNumber = 0;
-
-        request.upload.onprogress = function (e) {
-          if(e.lengthComputable) {
-            const currentProgressBar = document.querySelector(".current-percentage");
-            const percentage = document.querySelector(".upload-percentage");
-            const fileName = document.querySelector(".toast-file-name");
-
-            currentPercentageNumber = Math.round((e.loaded / e.total) * 100);
-  
-            console.log("Tamaño total del archivo cargado", e.total);
-            console.log("Se han subido", e.loaded);
-
-            currentProgressBar.style.width = `${currentPercentageNumber}%`;
-            percentage.textContent = `${currentPercentageNumber}%`;
-          }
-        }
-
-        request.open("POST", "/file/upload", true);
-        request.send(formData);
+        uploadFileToast.classList.add('slide');
       });
-
     </script>
   </body>
 </html>

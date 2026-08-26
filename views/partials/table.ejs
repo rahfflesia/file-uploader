@@ -25,17 +25,19 @@
                     <% } %>
                 </div>
                 <% if(downloadType === "public") { %>
-                    <a href="<%= element.share_link %>"><%= element.type === "folder" ? element.folder_name : element.file_name %>
+                    <div class="flex-column" style="gap: .25rem;">
+                        <a href="<%= element.share_link %>"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
                         <% if(element.type === "file" && element.file_extension) { %>
-                            <span class="file-extension blue" style="font-weight: bold;">(<%= element.file_extension%>)</span>
+                            <div class="file-extension blue" style="font-weight: 500; font-size: .7rem;"><%= element.file_extension %></div>
                         <% } %>
-                    </a>
+                    </div>
                 <% } else { %>
-                    <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %>
+                    <div class="flex-column" style="gap: .25rem;">
+                        <a href="<%= element.type === 'folder' ? `/folder/files/${element.folder_id}` : `/file/details/${element.file_id}` %>" class="folder-name"><%= element.type === "folder" ? element.folder_name : element.file_name %></a>
                         <% if(element.type === "file" && element.file_extension) { %>
-                            <span class="file-extension blue" style="font-weight: bold;">(<%= element.file_extension %>)</span>
+                            <div class="file-extension blue" style="font-weight: 500; font-size: .7rem;"><%= element.file_extension %></div>
                         <% } %>
-                    </a>
+                    </div>
                 <% } %>
             </div>
             <span><%= element.size %></span>
