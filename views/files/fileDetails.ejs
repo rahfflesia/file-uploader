@@ -18,16 +18,16 @@
           <% } else if (file.mime_type.includes('video')) { %>
             <video src="<%= file.url %>" controls></video>
           <% } else if (file.mime_type.includes('audio')) { %>
-            <div class="file-type-icon-wrapper" style="padding: 0; display: block;">
+            <div class="file-type-icon-wrapper" style="width: 250px; height: 250px; position: relative; overflow: hidden;">
               <img src="https://img.icons8.com/?size=100&id=101924&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon" style="margin: 0 auto;">
-              <audio src="<%= file.url %>" controls></audio>
+              <audio src="<%= file.url %>" style="position: absolute; bottom: 0; border-radius: 0 0 var(--border-radius) var(--border-radius);" controls></audio>
             </div>
           <% } else if(file.mime_type.includes('application/pdf')) { %>
-            <div class="file-type-icon-wrapper">
+            <div class="file-type-icon-wrapper" style="width: 250px; height: 250px;">
               <img src="https://img.icons8.com/?size=100&id=59859&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
             </div>
           <% } else { %>
-            <div class="file-type-icon-wrapper">
+            <div class="file-type-icon-wrapper" style="width: 250px; height: 250px;">
               <img src="https://img.icons8.com/?size=100&id=ENKyxGggqj1D&format=png&color=1b71e1" alt="file-type-icon" class="file-type-icon">
             </div>
           <% } %>

@@ -11,6 +11,16 @@ function validateUpdateFile() {
       .trim()
       .isInt({ min: 1 })
       .withMessage("Invalid id"),
+    body("file_name")
+      .isString()
+      .withMessage("The file name must be a string")
+      .bail()
+      .trim()
+      .notEmpty()
+      .withMessage("The file name cannot be empty")
+      .bail()
+      .isLength({min: 1, max: 512})
+      .withMessage("The file name length must be between 1 and 512 characters")
   ];
 }
 

@@ -8,6 +8,7 @@ const fs = require("fs");
 const { Readable } = require("node:stream");
 const { finished } = require("node:stream/promises");
 const { rm } = require("node:fs");
+const path = require("node:path");
 
 const dashboardRoute = "/dashboard";
 
@@ -158,9 +159,11 @@ async function updateFileName(req, res, next) {
     const updatedFile = await File.updateFileName(data);
 
     if (updatedFile.folder_id === null) {
+      req.flash("success", "File name updated successfully");
       return res.status(200).redirect(dashboardRoute);
     }
 
+    req.flash("success", "File name updates successfully");
     res.status(200).redirect(`/folder/files/${updatedFile.folder_id}`);
   } catch (err) {
     next(err);
@@ -302,6 +305,9 @@ async function uploadFile(req, res, next) {
         .end(byteArrayBuffer);
     });
 
+    const fileExtension = path.extname(req.file.originalname) !== "" && path.extname(req.file.originalname) !== "." ? 
+    path.extname(req.file.originalname).replace(".", "").toUpperCase() : null;
+
     const fileData = {
       file_name: req.file.originalname,
       url: result.secure_url,
@@ -311,6 +317,7 @@ async function uploadFile(req, res, next) {
       bytes: result.bytes,
       mime_type: req.file.mimetype,
       user_id: userId,
+      file_extension: fileExtension,
     };
 
     const uploadedFile = await File.createFile(fileData);

@@ -23,6 +23,7 @@
     <%- include("./partials/errorToast") %>
     <%- include("./partials/successToast") %>
     <%- include("./partials/details") %>
+    <%- include("./partials/uploadFileToast") %>
     <dialog class="share-folder-dialog">
       <div class="flex-between-row">
         <h2>Share folder</h2>
@@ -201,6 +202,7 @@
         const headerDetails = document.querySelector(".header-details");
         const resourceSize = document.querySelector(".resource-size");
         const resourceUploadDate = document.querySelector(".resource-upload-date");
+        const fileExtension = document.querySelector(".file-extension-details");
 
         const capitalizedType = element.type.charAt(0).toUpperCase() + element.type.slice(1);
         headerDetails.textContent = `${capitalizedType} details`;
@@ -209,6 +211,10 @@
           case "file":
             resourceName.textContent = "Name: " + element.file_name;
             resourceSize.textContent = "Size: " + element.size;
+
+            if(element.file_extension) {
+              fileExtension.textContent = `Type: ${element.file_extension}`;
+            }
 
             const uploadDate = new Date(element.uploaded_at);
             resourceUploadDate.textContent = "Upload date: " + uploadDate.toLocaleString("es-MX");
@@ -222,6 +228,7 @@
             break;
           default:
             console.error("This type of resource is not supported");
+            return;
         }
 
         resourceDetailsDialog.showModal();
@@ -265,6 +272,15 @@
           resourceDetailsDialog.close();
         }
       });
+
+      // Submit button from the upload file form
+      const uploadFileForm = document.querySelector(".file-upload-form");
+
+      uploadFileForm.addEventListener("submit", (event) => {
+        const inputFile = document.querySelector(".input-file");
+        const file = inputFile.files[0];
+      });
+
     </script>
   </body>
 </html>

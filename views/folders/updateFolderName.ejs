@@ -20,6 +20,9 @@
             name="folder_name"
             value="<%= folder.folder_name %>"
             class="default-input"
+            required
+            minlength="1"
+            maxlength="128"
           />
         </div>
         <input type="hidden" name="folder_id" value="<%= folder.folder_id %>" />

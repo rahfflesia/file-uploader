@@ -18,6 +18,7 @@ model files {
   bytes                    Int
   mime_type                String?        @db.VarChar(255)
   user_id                  Int
+  file_extension           String?        @db.VarChar(255)
   folders                  folders?       @relation(fields: [folder_id], references: [folder_id], onDelete: Cascade, onUpdate: NoAction)
   users                    users          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "files_user_id")
   shared_files             shared_files[]
