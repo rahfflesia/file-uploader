@@ -666,11 +666,42 @@ label {
 .upload-file-toast {
   position: fixed;
   box-shadow: var(--box-shadow);
-  padding: var(--padding);
   border-radius: var(--border-radius);
   bottom: 0;
   right: 0;
   margin: 1rem;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.upload-file-toast > * {
+  padding: var(--padding);
+}
+
+.file-toast-header {
+  background-color: var(--blue);
+  color: #fff;
+}
+
+.upload-file-toast-body {
+  gap: 0.25rem;
+}
+
+.progress-bar {
+  height: 0.6rem;
+  background-color: lightgray;
+  border-radius: var(--border-radius);
+}
+
+.current-percentage {
+  background-color: var(--blue);
+  width: 0;
+  height: 100%;
+  border-radius: var(--border-radius);
+}
+
+.upload-percentage {
+  font-size: 0.9rem;
 }
 
 @media (width <= 400px) {

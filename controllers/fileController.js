@@ -1,7 +1,11 @@
 const File = require("../models/File");
 const Folder = require("../models/Folder");
 const cloudinary = require("cloudinary").v2;
-const { convertBytes, isSharedFile, isSharedFolder } = require("../helpers/helpers");
+const {
+  convertBytes,
+  isSharedFile,
+  isSharedFolder,
+} = require("../helpers/helpers");
 const { validationResult, matchedData } = require("express-validator");
 const { randomUUID } = require("node:crypto");
 const fs = require("fs");
@@ -244,6 +248,8 @@ async function shareFile(req, res, next) {
 
 async function uploadFile(req, res, next) {
   try {
+    console.log("Me ha llegado una peticion");
+
     const r = validationResult(req);
     const userId = req.session.passport.user;
 
@@ -305,8 +311,11 @@ async function uploadFile(req, res, next) {
         .end(byteArrayBuffer);
     });
 
-    const fileExtension = path.extname(req.file.originalname) !== "" && path.extname(req.file.originalname) !== "." ? 
-    path.extname(req.file.originalname).replace(".", "").toUpperCase() : null;
+    const fileExtension =
+      path.extname(req.file.originalname) !== "" &&
+      path.extname(req.file.originalname) !== "."
+        ? path.extname(req.file.originalname).replace(".", "").toUpperCase()
+        : null;
 
     const fileData = {
       file_name: req.file.originalname,
@@ -322,12 +331,14 @@ async function uploadFile(req, res, next) {
 
     const uploadedFile = await File.createFile(fileData);
 
-    if(folderId) {
+    if (folderId) {
       const parentFolderId = await Folder.getRootFolderId(folderId);
       const folderHistory = await Folder.getFolderHistory(parentFolderId);
 
-      if(isSharedFolder(folderHistory) && parentFolderId) {
-        const notExpiredFolderData = folderHistory.filter((reg) => Date.now() < reg.expires_at.getTime());
+      if (isSharedFolder(folderHistory) && parentFolderId) {
+        const notExpiredFolderData = folderHistory.filter(
+          (reg) => Date.now() < reg.expires_at.getTime(),
+        );
         // This should always only have one element
         const folderData = notExpiredFolderData[0];
         const fileData = {
@@ -341,12 +352,13 @@ async function uploadFile(req, res, next) {
     }
 
     if (folderId === null) {
+      console.log("Archivo subido exitosamente");
       req.flash("success", "File uploaded successfully");
       return res.status(201).redirect(dashboardRoute);
     }
 
     const now = new Date();
-    await Folder.updateLastUsed(folderId, now); 
+    await Folder.updateLastUsed(folderId, now);
 
     req.flash("success", "File uploaded successfully");
     res.status(201).redirect(`/folder/files/${folderId}`);
@@ -374,7 +386,7 @@ async function downloadFile(req, res, next) {
       return res.redirect(dashboardRoute);
     }
 
-    if(userId !== file.user_id) {
+    if (userId !== file.user_id) {
       req.flash("error", "You don't have permissions to download this file");
       return res.redirect(dashboardRoute);
     }
@@ -419,7 +431,7 @@ async function downloadSharedFile(req, res, next) {
   try {
     const r = validationResult(req);
 
-    if(!r.isEmpty()) {
+    if (!r.isEmpty()) {
       req.flash("error", r.array());
       return res.redirect(dashboardRoute);
     }
@@ -429,12 +441,12 @@ async function downloadSharedFile(req, res, next) {
     // Esta debería de estar en el modelo de File no Folder
     const file = await Folder.findSharedFile(uuid);
 
-    if(!file) {
+    if (!file) {
       req.flash("error", "No file found");
       return res.redirect(dashboardRoute);
     }
 
-    if(Date.now() >= file.expires_at.getTime()) {
+    if (Date.now() >= file.expires_at.getTime()) {
       return res.redirect("/expired-link");
     }
 
