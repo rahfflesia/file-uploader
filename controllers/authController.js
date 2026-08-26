@@ -6,11 +6,11 @@ const { validationResult, matchedData } = require("express-validator");
 const dashboardRoute = "/dashboard";
 
 async function getLogin(req, res) {
-  res.status(200).render("./auth/login");
+  res.render("./auth/login");
 }
 
 async function getSignUp(req, res) {
-  res.status(200).render("./auth/signup");
+  res.render("./auth/signup");
 }
 
 async function postSignup(req, res, next) {

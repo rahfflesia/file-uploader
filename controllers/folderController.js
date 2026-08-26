@@ -47,11 +47,20 @@ async function recreateFolder(folderId, path, uuid) {
 async function createFolder(req, res, next) {
   try {
     const result = validationResult(req);
-    const parentFolderId = req.body.parent_folder_id
+
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      const hasErrorId = errors.some((error) => error.path === "parent_folder_id");
+
+      if(hasErrorId) {
+        req.flash("error", errors);
+        return res.redirect(dashboardRoute);
+      }
+
+      const parentFolderId = req.body.parent_folder_id
       ? parseInt(req.body.parent_folder_id)
       : null;
 
-    if (!result.isEmpty()) {
       req.flash("error", result.array());
 
       if (!parentFolderId) {
@@ -68,6 +77,8 @@ async function createFolder(req, res, next) {
       user_id: req.session.passport.user,
       parent_folder_id: parentFolderId,
     };
+
+    const parentFolderId = data.parent_folder_id;
 
     const createdFolder = await Folder.createFolder(folderData);
 
@@ -106,6 +117,14 @@ async function getAllFolderElements(req, res, next) {
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
+      const errors = result.array();
+      const hasErrorId = errors.some((error) => error.path === "folder_id");
+
+      if(hasErrorId) {
+        req.flash("error", errors);
+        return res.redirect(dashboardRoute);
+      }
+
       req.flash("error", result.array());
       return res.redirect(dashboardRoute);
     }

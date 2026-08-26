@@ -38,7 +38,7 @@ async function deleteFile(req, res, next) {
 
     if (userId !== file.user_id) {
       req.flash("error", "You don't have the permissions to delete this file");
-      return res.redirect();
+      return res.redirect(dashboardRoute);
     }
 
     const deletedFile = await File.deleteFile(fileId);
@@ -351,7 +351,7 @@ async function uploadFile(req, res, next) {
 
     if (folderId === null) {
       req.flash("success", "File uploaded successfully");
-      return res.status(201).redirect(dashboardRoute);
+      return res.redirect(dashboardRoute);
     }
 
     const now = new Date();
